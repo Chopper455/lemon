@@ -22,7 +22,7 @@
 #include <vector>
 #include <list>
 
-#include <lemon/bits/utility.h>
+#include <lemon/core.h>
 
 ///\ingroup graphbits
 ///\file
@@ -41,7 +41,7 @@ namespace lemon {
   /// value containers which are the node and edge maps.
   ///
   /// The graph's node and edge sets can be changed as we add or erase
-  /// nodes and edges in the graph. Lemon would like to handle easily
+  /// nodes and edges in the graph. LEMON would like to handle easily
   /// that the node and edge maps should contain values for all nodes or
   /// edges. If we want to check on every indicing if the map contains
   /// the current indicing key that cause a drawback in the performance
@@ -409,9 +409,9 @@ namespace lemon {
           (*it)->erase(item);
           ++it;
         } catch (const ImmediateDetach&) {
-          it = _observers.erase(it);
           (*it)->_index = _observers.end();
           (*it)->_notifier = 0;
+          it = _observers.erase(it);
         }
       }
     }
@@ -429,9 +429,9 @@ namespace lemon {
           (*it)->erase(items);
           ++it;
         } catch (const ImmediateDetach&) {
-          it = _observers.erase(it);
           (*it)->_index = _observers.end();
           (*it)->_notifier = 0;
+          it = _observers.erase(it);
         }
       }
     }
@@ -468,9 +468,9 @@ namespace lemon {
           (*it)->clear();
           ++it;
         } catch (const ImmediateDetach&) {
-          it = _observers.erase(it);
           (*it)->_index = _observers.end();
           (*it)->_notifier = 0;
+          it = _observers.erase(it);
         }
       }
     }

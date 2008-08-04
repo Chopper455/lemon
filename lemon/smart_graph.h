@@ -25,14 +25,8 @@
 
 #include <vector>
 
-#include <lemon/bits/invalid.h>
-
-#include <lemon/bits/base_extender.h>
-#include <lemon/bits/graph_extender.h>
-
-#include <lemon/bits/utility.h>
+#include <lemon/core.h>
 #include <lemon/error.h>
-
 #include <lemon/bits/graph_extender.h>
 
 namespace lemon {
@@ -471,7 +465,9 @@ namespace lemon {
       explicit Arc(int id) { _id = id;}
 
     public:
-      operator Edge() const { return edgeFromId(_id / 2); }
+      operator Edge() const { 
+        return _id != -1 ? edgeFromId(_id / 2) : INVALID; 
+      }
 
       Arc() {}
       Arc (Invalid) { _id = -1; }

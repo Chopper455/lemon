@@ -25,8 +25,7 @@
 #ifndef LEMON_CONCEPT_PATH_H
 #define LEMON_CONCEPT_PATH_H
 
-#include <lemon/bits/invalid.h>
-#include <lemon/bits/utility.h>
+#include <lemon/core.h>
 #include <lemon/concept_check.h>
 
 namespace lemon {
@@ -78,7 +77,7 @@ namespace lemon {
       /// Resets the path to an empty path.
       void clear() {}
 
-      /// \brief Lemon style iterator for path arcs
+      /// \brief LEMON style iterator for path arcs
       ///
       /// This class is used to iterate on the arcs of the paths.
       class ArcIt {
@@ -201,7 +200,7 @@ namespace lemon {
     /// algorithms can enumerate easily the arcs in reverse order.
     /// If we would like to give back a real path from these
     /// algorithms then we should create a temporarly path object. In
-    /// Lemon such algorithms gives back a path dumper what can
+    /// LEMON such algorithms gives back a path dumper what can
     /// assigned to a real path and the dumpers can be implemented as
     /// an adaptor class to the predecessor map.
 
@@ -233,7 +232,7 @@ namespace lemon {
       /// dumper.
       typedef False RevPathTag;
 
-      /// \brief Lemon style iterator for path arcs
+      /// \brief LEMON style iterator for path arcs
       ///
       /// This class is used to iterate on the arcs of the paths.
       class ArcIt {
@@ -260,7 +259,7 @@ namespace lemon {
 
       };
 
-      /// \brief Lemon style iterator for path arcs
+      /// \brief LEMON style iterator for path arcs
       ///
       /// This class is used to iterate on the arcs of the paths in
       /// reverse direction.

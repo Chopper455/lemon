@@ -18,7 +18,7 @@
 
 ///\ingroup lemon_io
 ///\file
-///\brief \ref lgf-format "Lemon Graph Format" writer.
+///\brief \ref lgf-format "LEMON Graph Format" writer.
 
 
 #ifndef LEMON_LGF_WRITER_H
@@ -34,7 +34,8 @@
 #include <functional>
 
 #include <lemon/assert.h>
-#include <lemon/graph_utils.h>
+#include <lemon/core.h>
+#include <lemon/maps.h>
 
 namespace lemon {
 
@@ -933,7 +934,7 @@ namespace lemon {
     std::ostream* _os;
     bool local_os;
 
-    Graph& _graph;
+    const Graph& _graph;
 
     std::string _nodes_caption;
     std::string _edges_caption;
