@@ -392,13 +392,14 @@ namespace lemon {
   class DigraphReader;
 
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(std::istream& is, Digraph& digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph,
+                                       std::istream& is = std::cin);
 
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(const std::string& fn, Digraph& digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph, const std::string& fn);
 
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(const char *fn, Digraph& digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph, const char *fn);
 
   /// \ingroup lemon_io
   ///
@@ -421,7 +422,7 @@ namespace lemon {
   /// rules.
   ///
   ///\code
-  /// DigraphReader<Digraph>(std::cin, digraph).
+  /// DigraphReader<Digraph>(digraph, std::cin).
   ///   nodeMap("coordinates", coord_map).
   ///   arcMap("capacity", cap_map).
   ///   node("source", src).
@@ -502,7 +503,7 @@ namespace lemon {
     ///
     /// Construct a directed graph reader, which reads from the given
     /// input stream.
-    DigraphReader(std::istream& is, Digraph& digraph)
+    DigraphReader(Digraph& digraph, std::istream& is = std::cin)
       : _is(&is), local_is(false), _digraph(digraph),
         _use_nodes(false), _use_arcs(false),
         _skip_nodes(false), _skip_arcs(false) {}
@@ -511,7 +512,7 @@ namespace lemon {
     ///
     /// Construct a directed graph reader, which reads from the given
     /// file.
-    DigraphReader(const std::string& fn, Digraph& digraph)
+    DigraphReader(Digraph& digraph, const std::string& fn)
       : _is(new std::ifstream(fn.c_str())), local_is(true),
         _filename(fn), _digraph(digraph),
         _use_nodes(false), _use_arcs(false),
@@ -523,7 +524,7 @@ namespace lemon {
     ///
     /// Construct a directed graph reader, which reads from the given
     /// file.
-    DigraphReader(const char* fn, Digraph& digraph)
+    DigraphReader(Digraph& digraph, const char* fn)
       : _is(new std::ifstream(fn)), local_is(true),
         _filename(fn), _digraph(digraph),
         _use_nodes(false), _use_arcs(false),
@@ -556,12 +557,12 @@ namespace lemon {
 
   private:
 
-    friend DigraphReader<Digraph> digraphReader<>(std::istream& is,
-                                                  Digraph& digraph);
-    friend DigraphReader<Digraph> digraphReader<>(const std::string& fn,
-                                                  Digraph& digraph);
-    friend DigraphReader<Digraph> digraphReader<>(const char *fn,
-                                                  Digraph& digraph);
+    friend DigraphReader<Digraph> digraphReader<>(Digraph& digraph,
+                                                  std::istream& is);
+    friend DigraphReader<Digraph> digraphReader<>(Digraph& digraph,
+                                                  const std::string& fn);
+    friend DigraphReader<Digraph> digraphReader<>(Digraph& digraph,
+                                                  const char *fn);
 
     DigraphReader(DigraphReader& other)
       : _is(other._is), local_is(other.local_is), _digraph(other._digraph),
@@ -1187,8 +1188,9 @@ namespace lemon {
   /// This function just returns a \ref DigraphReader class.
   /// \relates DigraphReader
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(std::istream& is, Digraph& digraph) {
-    DigraphReader<Digraph> tmp(is, digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph,
+                                       std::istream& is = std::cin) {
+    DigraphReader<Digraph> tmp(digraph, is);
     return tmp;
   }
 
@@ -1197,9 +1199,9 @@ namespace lemon {
   /// This function just returns a \ref DigraphReader class.
   /// \relates DigraphReader
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(const std::string& fn,
-                                       Digraph& digraph) {
-    DigraphReader<Digraph> tmp(fn, digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph,
+                                       const std::string& fn) {
+    DigraphReader<Digraph> tmp(digraph, fn);
     return tmp;
   }
 
@@ -1208,8 +1210,8 @@ namespace lemon {
   /// This function just returns a \ref DigraphReader class.
   /// \relates DigraphReader
   template <typename Digraph>
-  DigraphReader<Digraph> digraphReader(const char* fn, Digraph& digraph) {
-    DigraphReader<Digraph> tmp(fn, digraph);
+  DigraphReader<Digraph> digraphReader(Digraph& digraph, const char* fn) {
+    DigraphReader<Digraph> tmp(digraph, fn);
     return tmp;
   }
 
@@ -1217,13 +1219,14 @@ namespace lemon {
   class GraphReader;
 
   template <typename Graph>
-  GraphReader<Graph> graphReader(std::istream& is, Graph& graph);
+  GraphReader<Graph> graphReader(Graph& graph,
+                                 std::istream& is = std::cin);
 
   template <typename Graph>
-  GraphReader<Graph> graphReader(const std::string& fn, Graph& graph);
+  GraphReader<Graph> graphReader(Graph& graph, const std::string& fn);
 
   template <typename Graph>
-  GraphReader<Graph> graphReader(const char *fn, Graph& graph);
+  GraphReader<Graph> graphReader(Graph& graph, const char *fn);
 
   /// \ingroup lemon_io
   ///
@@ -1291,7 +1294,7 @@ namespace lemon {
     ///
     /// Construct an undirected graph reader, which reads from the given
     /// input stream.
-    GraphReader(std::istream& is, Graph& graph)
+    GraphReader(Graph& graph, std::istream& is = std::cin)
       : _is(&is), local_is(false), _graph(graph),
         _use_nodes(false), _use_edges(false),
         _skip_nodes(false), _skip_edges(false) {}
@@ -1300,7 +1303,7 @@ namespace lemon {
     ///
     /// Construct an undirected graph reader, which reads from the given
     /// file.
-    GraphReader(const std::string& fn, Graph& graph)
+    GraphReader(Graph& graph, const std::string& fn)
       : _is(new std::ifstream(fn.c_str())), local_is(true),
         _filename(fn), _graph(graph),
         _use_nodes(false), _use_edges(false),
@@ -1312,7 +1315,7 @@ namespace lemon {
     ///
     /// Construct an undirected graph reader, which reads from the given
     /// file.
-    GraphReader(const char* fn, Graph& graph)
+    GraphReader(Graph& graph, const char* fn)
       : _is(new std::ifstream(fn)), local_is(true),
         _filename(fn), _graph(graph),
         _use_nodes(false), _use_edges(false),
@@ -1344,10 +1347,10 @@ namespace lemon {
     }
 
   private:
-    friend GraphReader<Graph> graphReader<>(std::istream& is, Graph& graph);
-    friend GraphReader<Graph> graphReader<>(const std::string& fn,
-                                            Graph& graph);
-    friend GraphReader<Graph> graphReader<>(const char *fn, Graph& graph);
+    friend GraphReader<Graph> graphReader<>(Graph& graph, std::istream& is);
+    friend GraphReader<Graph> graphReader<>(Graph& graph,
+                                            const std::string& fn);
+    friend GraphReader<Graph> graphReader<>(Graph& graph, const char *fn);
 
     GraphReader(GraphReader& other)
       : _is(other._is), local_is(other.local_is), _graph(other._graph),
@@ -2021,8 +2024,8 @@ namespace lemon {
   /// This function just returns a \ref GraphReader class.
   /// \relates GraphReader
   template <typename Graph>
-  GraphReader<Graph> graphReader(std::istream& is, Graph& graph) {
-    GraphReader<Graph> tmp(is, graph);
+  GraphReader<Graph> graphReader(Graph& graph, std::istream& is = std::cin) {
+    GraphReader<Graph> tmp(graph, is);
     return tmp;
   }
 
@@ -2031,9 +2034,8 @@ namespace lemon {
   /// This function just returns a \ref GraphReader class.
   /// \relates GraphReader
   template <typename Graph>
-  GraphReader<Graph> graphReader(const std::string& fn,
-                                       Graph& graph) {
-    GraphReader<Graph> tmp(fn, graph);
+  GraphReader<Graph> graphReader(Graph& graph, const std::string& fn) {
+    GraphReader<Graph> tmp(graph, fn);
     return tmp;
   }
 
@@ -2042,8 +2044,8 @@ namespace lemon {
   /// This function just returns a \ref GraphReader class.
   /// \relates GraphReader
   template <typename Graph>
-  GraphReader<Graph> graphReader(const char* fn, Graph& graph) {
-    GraphReader<Graph> tmp(fn, graph);
+  GraphReader<Graph> graphReader(Graph& graph, const char* fn) {
+    GraphReader<Graph> tmp(graph, fn);
     return tmp;
   }
 
