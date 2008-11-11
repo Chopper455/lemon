@@ -12,7 +12,7 @@ lemon_libemon_la_SOURCES = \
         lemon/color.cc \
         lemon/random.cc
 
-#lemon_libemon_la_CXXFLAGS = $(GLPK_CFLAGS) $(CPLEX_CFLAGS) $(SOPLEX_CXXFLAGS)
+#lemon_libemon_la_CXXFLAGS = $(GLPK_CFLAGS) $(CPLEX_CFLAGS) $(SOPLEX_CXXFLAGS) $(AM_CXXFLAGS)
 #lemon_libemon_la_LDFLAGS = $(GLPK_LIBS) $(CPLEX_LIBS) $(SOPLEX_LIBS)
 
 lemon_HEADERS += \
@@ -28,16 +28,22 @@ lemon_HEADERS += \
         lemon/dijkstra.h \
         lemon/dim2.h \
 	lemon/error.h \
+	lemon/full_graph.h \
         lemon/graph_to_eps.h \
+        lemon/grid_graph.h \
+	lemon/hypercube_graph.h \
 	lemon/kruskal.h \
 	lemon/lgf_reader.h \
 	lemon/lgf_writer.h \
 	lemon/list_graph.h \
 	lemon/maps.h \
 	lemon/math.h \
+	lemon/max_matching.h \
+	lemon/nauty_reader.h \
 	lemon/path.h \
         lemon/random.h \
 	lemon/smart_graph.h \
+	lemon/suurballe.h \
         lemon/time_measure.h \
         lemon/tolerance.h \
 	lemon/unionfind.h
