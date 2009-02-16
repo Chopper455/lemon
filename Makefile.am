@@ -1,5 +1,7 @@
 ACLOCAL_AMFLAGS = -I m4
 
+AM_CXXFLAGS = $(WARNINGCXXFLAGS)
+
 AM_CPPFLAGS = -I$(top_srcdir) -I$(top_builddir)
 LDADD = $(top_builddir)/lemon/libemon.la
 
@@ -11,6 +13,7 @@ EXTRA_DIST = \
 	m4/lx_check_soplex.m4 \
 	CMakeLists.txt \
 	cmake/FindGhostscript.cmake \
+	cmake/FindGLPK.cmake \
 	cmake/version.cmake.in \
 	cmake/version.cmake \
 	cmake/nsis/lemon.ico \
