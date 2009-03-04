@@ -131,13 +131,18 @@ namespace lemon {
   ///
   /// This class implements an interface for the GLPK LP solver.
   ///\ingroup lp_group
-  class GlpkLp : public GlpkBase, public LpSolver {
+  class GlpkLp : public LpSolver, public GlpkBase {
   public:
 
     ///\e
     GlpkLp();
     ///\e
     GlpkLp(const GlpkLp&);
+
+    ///\e
+    virtual GlpkLp* cloneSolver() const;
+    ///\e
+    virtual GlpkLp* newSolver() const;
 
   private:
 
@@ -147,9 +152,6 @@ namespace lemon {
     void _clear_temporals();
 
   protected:
-
-    virtual GlpkLp* _cloneSolver() const;
-    virtual GlpkLp* _newSolver() const;
 
     virtual const char* _solverName() const;
 
@@ -165,8 +167,6 @@ namespace lemon {
     virtual Value _getPrimalRay(int i) const;
     virtual Value _getDualRay(int i) const;
 
-    ///\todo It should be clarified
-    ///
     virtual ProblemType _getPrimalType() const;
     virtual ProblemType _getDualType() const;
 
@@ -215,7 +215,7 @@ namespace lemon {
   ///
   /// This class implements an interface for the GLPK MIP solver.
   ///\ingroup lp_group
-  class GlpkMip : public GlpkBase, public MipSolver {
+  class GlpkMip : public MipSolver, public GlpkBase {
   public:
 
     ///\e
@@ -223,10 +223,10 @@ namespace lemon {
     ///\e
     GlpkMip(const GlpkMip&);
 
-  protected:
+    virtual GlpkMip* cloneSolver() const;
+    virtual GlpkMip* newSolver() const;
 
-    virtual GlpkMip* _cloneSolver() const;
-    virtual GlpkMip* _newSolver() const;
+  protected:
 
     virtual const char* _solverName() const;
 
