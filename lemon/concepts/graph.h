@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2009
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -20,11 +20,10 @@
 ///\file
 ///\brief The concept of Undirected Graphs.
 
-#ifndef LEMON_CONCEPT_GRAPH_H
-#define LEMON_CONCEPT_GRAPH_H
+#ifndef LEMON_CONCEPTS_GRAPH_H
+#define LEMON_CONCEPTS_GRAPH_H
 
 #include <lemon/concepts/graph_components.h>
-#include <lemon/concepts/graph.h>
 #include <lemon/core.h>
 
 namespace lemon {
