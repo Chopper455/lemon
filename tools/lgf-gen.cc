@@ -65,7 +65,7 @@ ListGraph::NodeMap<Point> coords(g);
 double totalLen(){
   double tlen=0;
   for(EdgeIt e(g);e!=INVALID;++e)
-    tlen+=sqrt((coords[g.v(e)]-coords[g.u(e)]).normSquare());
+    tlen+=std::sqrt((coords[g.v(e)]-coords[g.u(e)]).normSquare());
   return tlen;
 }
 
@@ -188,7 +188,7 @@ namespace _delaunay_bits {
       (q.x * q.x + q.y * q.y) * (r.x * p.y - p.x * r.y) +
       (r.x * r.x + r.y * r.y) * (p.x * q.y - q.x * p.y);
 
-    return d / (2 * a) + sqrt((d * d + e * e) / (4 * a * a) + f / a);
+    return d / (2 * a) + std::sqrt((d * d + e * e) / (4 * a * a) + f / a);
   }
 
   inline bool circle_form(const Point& p, const Point& q, const Point& r) {
@@ -206,7 +206,7 @@ namespace _delaunay_bits {
     double a = q.x - p.x;
     double b = (q.x - sx) * p.y - (p.x - sx) * q.y;
     double d = (q.x - sx) * (p.x - sx) * (p - q).normSquare();
-    return (b - sqrt(d)) / a;
+    return (b - std::sqrt(d)) / a;
   }
 
   struct YLess {
@@ -480,8 +480,8 @@ void sparse2(int d)
       Node b=g.v(*ei);
       g.erase(*ei);
       ConstMap<Arc,int> cegy(1);
-      Suurballe<ListGraph,ConstMap<Arc,int> > sur(g,cegy,a,b);
-      int k=sur.run(2);
+      Suurballe<ListGraph,ConstMap<Arc,int> > sur(g,cegy);
+      int k=sur.run(a,b,2);
       if(k<2 || sur.totalLength()>d)
         g.addEdge(a,b);
       else cnt++;
@@ -511,9 +511,8 @@ void sparseTriangle(int d)
       Edge ne;
       if(e==INVALID) {
         ConstMap<Arc,int> cegy(1);
-        Suurballe<ListGraph,ConstMap<Arc,int> >
-          sur(g,cegy,pi->a,pi->b);
-        int k=sur.run(2);
+        Suurballe<ListGraph,ConstMap<Arc,int> > sur(g,cegy);
+        int k=sur.run(pi->a,pi->b,2);
         if(k<2 || sur.totalLength()>d)
           {
             ne=g.addEdge(pi->a,pi->b);
@@ -720,7 +719,7 @@ int main(int argc,const char **argv)
     .run();
 
   if (ap["rand"]) {
-    int seed = time(0);
+    int seed = int(time(0));
     std::cout << "Random number seed: " << seed << std::endl;
     rnd = Random(seed);
   }
@@ -813,7 +812,7 @@ int main(int argc,const char **argv)
   std::cout << "Number of arcs    : " << countEdges(g) << std::endl;
   double tlen=0;
   for(EdgeIt e(g);e!=INVALID;++e)
-    tlen+=sqrt((coords[g.v(e)]-coords[g.u(e)]).normSquare());
+    tlen+=std::sqrt((coords[g.v(e)]-coords[g.u(e)]).normSquare());
   std::cout << "Total arc length  : " << tlen << std::endl;
 
   if(ap["eps"])
