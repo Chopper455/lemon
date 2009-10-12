@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2009
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -22,6 +22,7 @@
 #include <lemon/concept_check.h>
 #include <lemon/concepts/maps.h>
 #include <lemon/maps.h>
+#include <lemon/list_graph.h>
 
 #include "test_tools.h"
 
@@ -170,7 +171,7 @@ int main()
   {
     typedef ComposeMap<DoubleMap, ReadMap<B,A> > CompMap;
     checkConcept<ReadMap<B,double>, CompMap>();
-    CompMap map1(DoubleMap(),ReadMap<B,A>());
+    CompMap map1 = CompMap(DoubleMap(),ReadMap<B,A>());
     CompMap map2 = composeMap(DoubleMap(), ReadMap<B,A>());
 
     SparseMap<double, bool> m1(false); m1[3.14] = true;
@@ -183,7 +184,7 @@ int main()
   {
     typedef CombineMap<DoubleMap, DoubleMap, std::plus<double> > CombMap;
     checkConcept<ReadMap<A,double>, CombMap>();
-    CombMap map1(DoubleMap(), DoubleMap());
+    CombMap map1 = CombMap(DoubleMap(), DoubleMap());
     CombMap map2 = combineMap(DoubleMap(), DoubleMap(), std::plus<double>());
 
     check(combineMap(constMap<B,int,2>(), identityMap<B>(), &binc)[B()] == 3,
@@ -195,11 +196,11 @@ int main()
     checkConcept<ReadMap<A,B>, FunctorToMap<F,A,B> >();
     checkConcept<ReadMap<A,B>, FunctorToMap<F> >();
     FunctorToMap<F> map1;
-    FunctorToMap<F> map2(F());
+    FunctorToMap<F> map2 = FunctorToMap<F>(F());
     B b = functorToMap(F())[A()];
 
     checkConcept<ReadMap<A,B>, MapToFunctor<ReadMap<A,B> > >();
-    MapToFunctor<ReadMap<A,B> > map(ReadMap<A,B>());
+    MapToFunctor<ReadMap<A,B> > map = MapToFunctor<ReadMap<A,B> >(ReadMap<A,B>());
 
     check(functorToMap(&func)[A()] == 3,
           "Something is wrong with FunctorToMap");
@@ -347,6 +348,40 @@ int main()
     for ( LoggerBoolMap<vec::iterator>::Iterator it = map2.begin();
           it != map2.end(); ++it )
       check(v1[i++] == *it, "Something is wrong with LoggerBoolMap");
+  }
+  
+  // CrossRefMap
+  {
+    typedef ListDigraph Graph;
+    DIGRAPH_TYPEDEFS(Graph);
+
+    checkConcept<ReadWriteMap<Node, int>,
+                 CrossRefMap<Graph, Node, int> >();
+    
+    Graph gr;
+    typedef CrossRefMap<Graph, Node, char> CRMap;
+    typedef CRMap::ValueIterator ValueIt;
+    CRMap map(gr);
+    
+    Node n0 = gr.addNode();
+    Node n1 = gr.addNode();
+    Node n2 = gr.addNode();
+    
+    map.set(n0, 'A');
+    map.set(n1, 'B');
+    map.set(n2, 'C');
+    map.set(n2, 'A');
+    map.set(n0, 'C');
+
+    check(map[n0] == 'C' && map[n1] == 'B' && map[n2] == 'A',
+          "Wrong CrossRefMap");
+    check(map('A') == n2 && map.inverse()['A'] == n2, "Wrong CrossRefMap");
+    check(map('B') == n1 && map.inverse()['B'] == n1, "Wrong CrossRefMap");
+    check(map('C') == n0 && map.inverse()['C'] == n0, "Wrong CrossRefMap");
+
+    ValueIt it = map.beginValue();
+    check(*it++ == 'A' && *it++ == 'B' && *it++ == 'C' &&
+          it == map.endValue(), "Wrong value iterator");
   }
 
   return 0;
