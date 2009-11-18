@@ -262,7 +262,7 @@ namespace lemon {
       return arc._id >> _dim;
     }
 
-    int index(Node node) const {
+    static int index(Node node) {
       return node._id;
     }
 
@@ -293,6 +293,8 @@ namespace lemon {
   /// This type fully conforms to the \ref concepts::Graph "Graph concept".
   /// Most of its member functions and nested classes are documented
   /// only in the concept class.
+  ///
+  /// This class provides constant time counting for nodes, edges and arcs.
   ///
   /// \note The type of the indices is chosen to \c int for efficiency
   /// reasons. Thus the maximum dimension of this implementation is 26
@@ -356,7 +358,7 @@ namespace lemon {
     ///
     /// Gives back the index of the given node.
     /// The lower bits of the integer describes the node.
-    int index(Node node) const {
+    static int index(Node node) {
       return Parent::index(node);
     }
 

@@ -194,6 +194,8 @@ namespace lemon {
   ///Most of its member functions and nested classes are documented
   ///only in the concept class.
   ///
+  ///This class provides constant time counting for nodes and arcs.
+  ///
   ///\sa concepts::Digraph
   ///\sa SmartGraph
   class SmartDigraph : public ExtendedSmartDigraphBase {
@@ -497,7 +499,7 @@ namespace lemon {
       node._id = nodes.size() - 1;
     }
 
-    void next(Node& node) const {
+    static void next(Node& node) {
       --node._id;
     }
 
@@ -505,7 +507,7 @@ namespace lemon {
       arc._id = arcs.size() - 1;
     }
 
-    void next(Arc& arc) const {
+    static void next(Arc& arc) {
       --arc._id;
     }
 
@@ -513,7 +515,7 @@ namespace lemon {
       arc._id = arcs.size() / 2 - 1;
     }
 
-    void next(Edge& arc) const {
+    static void next(Edge& arc) {
       --arc._id;
     }
 
@@ -619,6 +621,8 @@ namespace lemon {
   /// and it also provides some additional functionalities.
   /// Most of its member functions and nested classes are documented
   /// only in the concept class.
+  ///
+  /// This class provides constant time counting for nodes, edges and arcs.
   ///
   /// \sa concepts::Graph
   /// \sa SmartDigraph
