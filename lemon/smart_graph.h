@@ -305,7 +305,9 @@ namespace lemon {
       Node b = addNode();
       nodes[b._id].first_out=nodes[n._id].first_out;
       nodes[n._id].first_out=-1;
-      for(int i=nodes[b._id].first_out;i!=-1;i++) arcs[i].source=b._id;
+      for(int i=nodes[b._id].first_out; i!=-1; i=arcs[i].next_out) {
+        arcs[i].source=b._id;
+      }
       if(connect) addArc(n,b);
       return b;
     }
@@ -728,8 +730,8 @@ namespace lemon {
         dir.push_back(arcFromId(n));
         dir.push_back(arcFromId(n-1));
         Parent::notifier(Arc()).erase(dir);
-        nodes[arcs[n].target].first_out=arcs[n].next_out;
-        nodes[arcs[n-1].target].first_out=arcs[n-1].next_out;
+        nodes[arcs[n-1].target].first_out=arcs[n].next_out;
+        nodes[arcs[n].target].first_out=arcs[n-1].next_out;
         arcs.pop_back();
         arcs.pop_back();
       }

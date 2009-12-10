@@ -847,7 +847,9 @@ namespace lemon {
       while (readSuccess() && line >> c && c != '@') {
         readLine();
       }
-      line.putback(c);
+      if (readSuccess()) {
+        line.putback(c);
+      }
     }
 
     void readNodes() {
@@ -1687,7 +1689,9 @@ namespace lemon {
       while (readSuccess() && line >> c && c != '@') {
         readLine();
       }
-      line.putback(c);
+      if (readSuccess()) {
+        line.putback(c);
+      }
     }
 
     void readNodes() {
@@ -2244,7 +2248,9 @@ namespace lemon {
       while (readSuccess() && line >> c && c != '@') {
         readLine();
       }
-      line.putback(c);
+      if (readSuccess()) {
+        line.putback(c);
+      }
     }
 
   public:
@@ -2585,7 +2591,9 @@ namespace lemon {
       while (readSuccess() && line >> c && c != '@') {
         readLine();
       }
-      line.putback(c);
+      if (readSuccess()) {
+        line.putback(c);
+      }
     }
 
     void readMaps(std::vector<std::string>& maps) {
