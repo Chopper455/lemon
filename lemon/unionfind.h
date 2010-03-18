@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -1287,6 +1287,15 @@ namespace lemon {
     HeapUnionFind(ItemIntMap& _index)
       : index(_index), first_class(-1),
         first_free_class(-1), first_free_node(-1) {}
+
+    /// \brief Clears the union-find data structure
+    ///
+    /// Erase each item from the data structure.
+    void clear() {
+      nodes.clear();
+      classes.clear();
+      first_free_node = first_free_class = first_class = -1;
+    }
 
     /// \brief Insert a new node into a new component.
     ///

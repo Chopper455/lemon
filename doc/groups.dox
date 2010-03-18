@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -263,14 +263,6 @@ used easily in such algorithms.
 */
 
 /**
-@defgroup matrices Matrices
-@ingroup datas
-\brief Two dimensional data storages implemented in LEMON.
-
-This group contains two dimensional data storages implemented in LEMON.
-*/
-
-/**
 @defgroup auxdat Auxiliary Data Structures
 @ingroup datas
 \brief Auxiliary data structures implemented in LEMON.
@@ -386,7 +378,7 @@ fastest method for computing a maximum flow. All implementations
 also provide functions to query the minimum cut, which is the dual
 problem of maximum flow.
 
-\ref Circulation is a preflow push-relabel algorithm implemented directly 
+\ref Circulation is a preflow push-relabel algorithm implemented directly
 for finding feasible circulations, which is a somewhat different problem,
 but it is strongly related to maximum flow.
 For more information, see \ref Circulation.
@@ -472,19 +464,19 @@ arc lengths uniformly by \f$\epsilon\f$ results in a conservative length
 function.
 
 LEMON contains three algorithms for solving the minimum mean cycle problem:
-- \ref Karp "Karp"'s original algorithm \ref amo93networkflows,
+- \ref KarpMmc Karp's original algorithm \ref amo93networkflows,
   \ref dasdan98minmeancycle.
-- \ref HartmannOrlin "Hartmann-Orlin"'s algorithm, which is an improved
+- \ref HartmannOrlinMmc Hartmann-Orlin's algorithm, which is an improved
   version of Karp's algorithm \ref dasdan98minmeancycle.
-- \ref Howard "Howard"'s policy iteration algorithm
+- \ref HowardMmc Howard's policy iteration algorithm
   \ref dasdan98minmeancycle.
 
-In practice, the Howard algorithm proved to be by far the most efficient
-one, though the best known theoretical bound on its running time is
-exponential.
-Both Karp and HartmannOrlin algorithms run in time O(ne) and use space
-O(n<sup>2</sup>+e), but the latter one is typically faster due to the
-applied early termination scheme.
+In practice, the \ref HowardMmc "Howard" algorithm proved to be by far the
+most efficient one, though the best known theoretical bound on its running
+time is exponential.
+Both \ref KarpMmc "Karp" and \ref HartmannOrlinMmc "Hartmann-Orlin" algorithms
+run in time O(ne) and use space O(n<sup>2</sup>+e), but the latter one is
+typically faster due to the applied early termination scheme.
 */
 
 /**
@@ -522,9 +514,16 @@ The matching algorithms implemented in LEMON:
 - \ref MaxWeightedPerfectMatching
   Edmond's blossom shrinking algorithm for calculating maximum weighted
   perfect matching in general graphs.
+- \ref MaxFractionalMatching Push-relabel algorithm for calculating
+  maximum cardinality fractional matching in general graphs.
+- \ref MaxWeightedFractionalMatching Augmenting path algorithm for calculating
+  maximum weighted fractional matching in general graphs.
+- \ref MaxWeightedPerfectFractionalMatching
+  Augmenting path algorithm for calculating maximum weighted
+  perfect fractional matching in general graphs.
 
-\image html bipartite_matching.png
-\image latex bipartite_matching.eps "Bipartite Matching" width=\textwidth
+\image html matching.png
+\image latex matching.eps "Min Cost Perfect Matching" width=\textwidth
 */
 
 /**

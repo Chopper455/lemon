@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -25,9 +25,9 @@
 #include <lemon/concepts/digraph.h>
 #include <lemon/concept_check.h>
 
-#include <lemon/karp.h>
-#include <lemon/hartmann_orlin.h>
-#include <lemon/howard.h>
+#include <lemon/karp_mmc.h>
+#include <lemon/hartmann_orlin_mmc.h>
+#include <lemon/howard_mmc.h>
 
 #include "test_tools.h"
 
@@ -61,9 +61,9 @@ char test_lgf[] =
   "6 7    1    1    1    1   0  0  0  0\n"
   "7 7    4    4    4   -1   0  0  0  1\n";
 
-                        
+
 // Check the interface of an MMC algorithm
-template <typename GR, typename Value>
+template <typename GR, typename Cost>
 struct MmcClassConcept
 {
   template <typename MMC>
@@ -73,30 +73,30 @@ struct MmcClassConcept
 
       typedef typename MMC
         ::template SetPath<ListPath<GR> >
-        ::template SetLargeValue<Value>
+        ::template SetLargeCost<Cost>
         ::Create MmcAlg;
-      MmcAlg mmc(me.g, me.length);
+      MmcAlg mmc(me.g, me.cost);
       const MmcAlg& const_mmc = mmc;
-      
+
       typename MmcAlg::Tolerance tol = const_mmc.tolerance();
       mmc.tolerance(tol);
-      
+
       b = mmc.cycle(p).run();
-      b = mmc.findMinMean();
+      b = mmc.findCycleMean();
       b = mmc.findCycle();
 
-      v = const_mmc.cycleLength();
-      i = const_mmc.cycleArcNum();
+      v = const_mmc.cycleCost();
+      i = const_mmc.cycleSize();
       d = const_mmc.cycleMean();
       p = const_mmc.cycle();
     }
 
-    typedef concepts::ReadMap<typename GR::Arc, Value> LM;
-  
+    typedef concepts::ReadMap<typename GR::Arc, Cost> CM;
+
     GR g;
-    LM length;
+    CM cost;
     ListPath<GR> p;
-    Value v;
+    Cost v;
     int i;
     double d;
     bool b;
@@ -108,13 +108,13 @@ template <typename MMC>
 void checkMmcAlg(const SmartDigraph& gr,
                  const SmartDigraph::ArcMap<int>& lm,
                  const SmartDigraph::ArcMap<int>& cm,
-                 int length, int size) {
+                 int cost, int size) {
   MMC alg(gr, lm);
-  alg.findMinMean();
-  check(alg.cycleMean() == static_cast<double>(length) / size,
+  alg.findCycleMean();
+  check(alg.cycleMean() == static_cast<double>(cost) / size,
         "Wrong cycle mean");
   alg.findCycle();
-  check(alg.cycleLength() == length && alg.cycleArcNum() == size,
+  check(alg.cycleCost() == cost && alg.cycleSize() == size,
         "Wrong path");
   SmartDigraph::ArcMap<int> cycle(gr, 0);
   for (typename MMC::Path::ArcIt a(alg.cycle()); a != INVALID; ++a) {
@@ -148,39 +148,39 @@ int main() {
   {
     typedef concepts::Digraph GR;
 
-    // Karp
+    // KarpMmc
     checkConcept< MmcClassConcept<GR, int>,
-                  Karp<GR, concepts::ReadMap<GR::Arc, int> > >();
+                  KarpMmc<GR, concepts::ReadMap<GR::Arc, int> > >();
     checkConcept< MmcClassConcept<GR, float>,
-                  Karp<GR, concepts::ReadMap<GR::Arc, float> > >();
-    
-    // HartmannOrlin
-    checkConcept< MmcClassConcept<GR, int>,
-                  HartmannOrlin<GR, concepts::ReadMap<GR::Arc, int> > >();
-    checkConcept< MmcClassConcept<GR, float>,
-                  HartmannOrlin<GR, concepts::ReadMap<GR::Arc, float> > >();
-    
-    // Howard
-    checkConcept< MmcClassConcept<GR, int>,
-                  Howard<GR, concepts::ReadMap<GR::Arc, int> > >();
-    checkConcept< MmcClassConcept<GR, float>,
-                  Howard<GR, concepts::ReadMap<GR::Arc, float> > >();
+                  KarpMmc<GR, concepts::ReadMap<GR::Arc, float> > >();
 
-    if (IsSameType<Howard<GR, concepts::ReadMap<GR::Arc, int> >::LargeValue,
-          long_int>::result == 0) check(false, "Wrong LargeValue type");
-    if (IsSameType<Howard<GR, concepts::ReadMap<GR::Arc, float> >::LargeValue,
-          double>::result == 0) check(false, "Wrong LargeValue type");
+    // HartmannOrlinMmc
+    checkConcept< MmcClassConcept<GR, int>,
+                  HartmannOrlinMmc<GR, concepts::ReadMap<GR::Arc, int> > >();
+    checkConcept< MmcClassConcept<GR, float>,
+                  HartmannOrlinMmc<GR, concepts::ReadMap<GR::Arc, float> > >();
+
+    // HowardMmc
+    checkConcept< MmcClassConcept<GR, int>,
+                  HowardMmc<GR, concepts::ReadMap<GR::Arc, int> > >();
+    checkConcept< MmcClassConcept<GR, float>,
+                  HowardMmc<GR, concepts::ReadMap<GR::Arc, float> > >();
+
+    check((IsSameType<HowardMmc<GR, concepts::ReadMap<GR::Arc, int> >
+           ::LargeCost, long_int>::result == 1), "Wrong LargeCost type");
+    check((IsSameType<HowardMmc<GR, concepts::ReadMap<GR::Arc, float> >
+           ::LargeCost, double>::result == 1), "Wrong LargeCost type");
   }
 
   // Run various tests
   {
     typedef SmartDigraph GR;
     DIGRAPH_TYPEDEFS(GR);
-    
+
     GR gr;
     IntArcMap l1(gr), l2(gr), l3(gr), l4(gr);
     IntArcMap c1(gr), c2(gr), c3(gr), c4(gr);
-    
+
     std::istringstream input(test_lgf);
     digraphReader(gr, input).
       arcMap("len1", l1).
@@ -194,22 +194,22 @@ int main() {
       run();
 
     // Karp
-    checkMmcAlg<Karp<GR, IntArcMap> >(gr, l1, c1,  6, 3);
-    checkMmcAlg<Karp<GR, IntArcMap> >(gr, l2, c2,  5, 2);
-    checkMmcAlg<Karp<GR, IntArcMap> >(gr, l3, c3,  0, 1);
-    checkMmcAlg<Karp<GR, IntArcMap> >(gr, l4, c4, -1, 1);
+    checkMmcAlg<KarpMmc<GR, IntArcMap> >(gr, l1, c1,  6, 3);
+    checkMmcAlg<KarpMmc<GR, IntArcMap> >(gr, l2, c2,  5, 2);
+    checkMmcAlg<KarpMmc<GR, IntArcMap> >(gr, l3, c3,  0, 1);
+    checkMmcAlg<KarpMmc<GR, IntArcMap> >(gr, l4, c4, -1, 1);
 
     // HartmannOrlin
-    checkMmcAlg<HartmannOrlin<GR, IntArcMap> >(gr, l1, c1,  6, 3);
-    checkMmcAlg<HartmannOrlin<GR, IntArcMap> >(gr, l2, c2,  5, 2);
-    checkMmcAlg<HartmannOrlin<GR, IntArcMap> >(gr, l3, c3,  0, 1);
-    checkMmcAlg<HartmannOrlin<GR, IntArcMap> >(gr, l4, c4, -1, 1);
+    checkMmcAlg<HartmannOrlinMmc<GR, IntArcMap> >(gr, l1, c1,  6, 3);
+    checkMmcAlg<HartmannOrlinMmc<GR, IntArcMap> >(gr, l2, c2,  5, 2);
+    checkMmcAlg<HartmannOrlinMmc<GR, IntArcMap> >(gr, l3, c3,  0, 1);
+    checkMmcAlg<HartmannOrlinMmc<GR, IntArcMap> >(gr, l4, c4, -1, 1);
 
     // Howard
-    checkMmcAlg<Howard<GR, IntArcMap> >(gr, l1, c1,  6, 3);
-    checkMmcAlg<Howard<GR, IntArcMap> >(gr, l2, c2,  5, 2);
-    checkMmcAlg<Howard<GR, IntArcMap> >(gr, l3, c3,  0, 1);
-    checkMmcAlg<Howard<GR, IntArcMap> >(gr, l4, c4, -1, 1);
+    checkMmcAlg<HowardMmc<GR, IntArcMap> >(gr, l1, c1,  6, 3);
+    checkMmcAlg<HowardMmc<GR, IntArcMap> >(gr, l2, c2,  5, 2);
+    checkMmcAlg<HowardMmc<GR, IntArcMap> >(gr, l3, c3,  0, 1);
+    checkMmcAlg<HowardMmc<GR, IntArcMap> >(gr, l4, c4, -1, 1);
   }
 
   return 0;

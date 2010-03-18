@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -16,8 +16,8 @@
  *
  */
 
-#ifndef LEMON_BINOM_HEAP_H
-#define LEMON_BINOM_HEAP_H
+#ifndef LEMON_BINOMIAL_HEAP_H
+#define LEMON_BINOMIAL_HEAP_H
 
 ///\file
 ///\ingroup heaps
@@ -53,7 +53,7 @@ namespace lemon {
 #else
   template <typename PR, typename IM, typename CMP = std::less<PR> >
 #endif
-  class BinomHeap {
+  class BinomialHeap {
   public:
     /// Type of the item-int map.
     typedef IM ItemIntMap;
@@ -94,7 +94,7 @@ namespace lemon {
     /// \param map A map that assigns \c int values to the items.
     /// It is used internally to handle the cross references.
     /// The assigned value must be \c PRE_HEAP (<tt>-1</tt>) for each item.
-    explicit BinomHeap(ItemIntMap &map)
+    explicit BinomialHeap(ItemIntMap &map)
       : _min(0), _head(-1), _iim(map), _num_items(0) {}
 
     /// \brief Constructor.
@@ -104,7 +104,7 @@ namespace lemon {
     /// It is used internally to handle the cross references.
     /// The assigned value must be \c PRE_HEAP (<tt>-1</tt>) for each item.
     /// \param comp The function object used for comparing the priorities.
-    BinomHeap(ItemIntMap &map, const Compare &comp)
+    BinomialHeap(ItemIntMap &map, const Compare &comp)
       : _min(0), _head(-1), _iim(map), _comp(comp), _num_items(0) {}
 
     /// \brief The number of items stored in the heap.
@@ -258,7 +258,7 @@ namespace lemon {
       int i=_iim[item];
       int p=_data[i].parent;
       _data[i].prio=value;
-      
+
       while( p!=-1 && _comp(value, _data[p].prio) ) {
         _data[i].name=_data[p].name;
         _data[i].prio=_data[p].prio;
@@ -322,7 +322,7 @@ namespace lemon {
     }
 
   private:
-    
+
     // Find the minimum of the roots
     int findMin() {
       if( _head!=-1 ) {
@@ -350,7 +350,7 @@ namespace lemon {
         interleave(a);
       }
       if( _data[_head].right_neighbor==-1 ) return;
-      
+
       int x=_head;
       int x_prev=-1, x_next=_data[x].right_neighbor;
       while( x_next!=-1 ) {
@@ -384,7 +384,7 @@ namespace lemon {
       int p=_head, q=a;
       int curr=_data.size();
       _data.push_back(Store());
-      
+
       while( p!=-1 || q!=-1 ) {
         if( q==-1 || ( p!=-1 && _data[p].degree<_data[q].degree ) ) {
           _data[curr].right_neighbor=p;
@@ -397,7 +397,7 @@ namespace lemon {
           q=_data[q].right_neighbor;
         }
       }
-      
+
       _head=_data.back().right_neighbor;
       _data.pop_back();
     }
@@ -424,7 +424,7 @@ namespace lemon {
   private:
 
     class Store {
-      friend class BinomHeap;
+      friend class BinomialHeap;
 
       Item name;
       int parent;
@@ -441,5 +441,5 @@ namespace lemon {
 
 } //namespace lemon
 
-#endif //LEMON_BINOM_HEAP_H
+#endif //LEMON_BINOMIAL_HEAP_H
 

@@ -60,7 +60,7 @@ lemon_HEADERS += \
 	lemon/bellman_ford.h \
 	lemon/bfs.h \
 	lemon/bin_heap.h \
-	lemon/binom_heap.h \
+	lemon/binomial_heap.h \
 	lemon/bucket_heap.h \
 	lemon/capacity_scaling.h \
 	lemon/cbc.h \
@@ -75,6 +75,7 @@ lemon_HEADERS += \
 	lemon/cplex.h \
 	lemon/cycle_canceling.h \
 	lemon/dfs.h \
+	lemon/dheap.h \
 	lemon/dijkstra.h \
 	lemon/dim2.h \
 	lemon/dimacs.h \
@@ -83,17 +84,16 @@ lemon_HEADERS += \
 	lemon/error.h \
 	lemon/euler.h \
 	lemon/fib_heap.h \
-	lemon/fourary_heap.h \
+	lemon/fractional_matching.h \
 	lemon/full_graph.h \
 	lemon/glpk.h \
 	lemon/gomory_hu.h \
 	lemon/graph_to_eps.h \
 	lemon/grid_graph.h \
-	lemon/hartmann_orlin.h \
-	lemon/howard.h \
+	lemon/hartmann_orlin_mmc.h \
+	lemon/howard_mmc.h \
 	lemon/hypercube_graph.h \
-	lemon/karp.h \
-	lemon/kary_heap.h \
+	lemon/karp_mmc.h \
 	lemon/kruskal.h \
 	lemon/hao_orlin.h \
 	lemon/lgf_reader.h \
@@ -112,6 +112,7 @@ lemon_HEADERS += \
 	lemon/path.h \
 	lemon/planarity.h \
 	lemon/preflow.h \
+	lemon/quad_heap.h \
 	lemon/radix_heap.h \
 	lemon/radix_sort.h \
 	lemon/random.h \

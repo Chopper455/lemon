@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -97,7 +97,7 @@ namespace lemon {
       /// infinite upper bound.
       UNBOUNDED
     };
-    
+
     /// \brief Constants for selecting the type of the supply constraints.
     ///
     /// Enum type containing constants for selecting the supply type,
@@ -115,7 +115,7 @@ namespace lemon {
       /// supply/demand constraints in the definition of the problem.
       LEQ
     };
-    
+
     /// \brief Constants for selecting the pivot rule.
     ///
     /// Enum type containing constants for selecting the pivot rule for
@@ -158,22 +158,27 @@ namespace lemon {
       /// candidate list and extends this list in every iteration.
       ALTERING_LIST
     };
-    
+
   private:
 
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
 
     typedef std::vector<int> IntVector;
-    typedef std::vector<char> CharVector;
     typedef std::vector<Value> ValueVector;
     typedef std::vector<Cost> CostVector;
+    typedef std::vector<char> BoolVector;
+    // Note: vector<char> is used instead of vector<bool> for efficiency reasons
 
     // State constants for arcs
-    enum ArcStateEnum {
+    enum ArcState {
       STATE_UPPER = -1,
       STATE_TREE  =  0,
       STATE_LOWER =  1
     };
+
+    typedef std::vector<signed char> StateVector;
+    // Note: vector<signed char> is used instead of vector<ArcState> for
+    // efficiency reasons
 
   private:
 
@@ -213,8 +218,8 @@ namespace lemon {
     IntVector _succ_num;
     IntVector _last_succ;
     IntVector _dirty_revs;
-    CharVector _forward;
-    CharVector _state;
+    BoolVector _forward;
+    StateVector _state;
     int _root;
 
     // Temporary data used in the current pivot iteration
@@ -222,11 +227,11 @@ namespace lemon {
     int first, second, right, last;
     int stem, par_stem, new_stem;
     Value delta;
-    
+
     const Value MAX;
 
   public:
-  
+
     /// \brief Constant for infinite upper bounds (capacities).
     ///
     /// Constant for infinite upper bounds (capacities).
@@ -245,7 +250,7 @@ namespace lemon {
       const IntVector  &_source;
       const IntVector  &_target;
       const CostVector &_cost;
-      const CharVector &_state;
+      const StateVector &_state;
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
@@ -266,7 +271,7 @@ namespace lemon {
       // Find next entering arc
       bool findEnteringArc() {
         Cost c;
-        for (int e = _next_arc; e < _search_arc_num; ++e) {
+        for (int e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < 0) {
             _in_arc = e;
@@ -274,7 +279,7 @@ namespace lemon {
             return true;
           }
         }
-        for (int e = 0; e < _next_arc; ++e) {
+        for (int e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < 0) {
             _in_arc = e;
@@ -297,7 +302,7 @@ namespace lemon {
       const IntVector  &_source;
       const IntVector  &_target;
       const CostVector &_cost;
-      const CharVector &_state;
+      const StateVector &_state;
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
@@ -314,7 +319,7 @@ namespace lemon {
       // Find next entering arc
       bool findEnteringArc() {
         Cost c, min = 0;
-        for (int e = 0; e < _search_arc_num; ++e) {
+        for (int e = 0; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < min) {
             min = c;
@@ -336,7 +341,7 @@ namespace lemon {
       const IntVector  &_source;
       const IntVector  &_target;
       const CostVector &_cost;
-      const CharVector &_state;
+      const StateVector &_state;
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
@@ -355,7 +360,7 @@ namespace lemon {
         _next_arc(0)
       {
         // The main parameters of the pivot rule
-        const double BLOCK_SIZE_FACTOR = 0.5;
+        const double BLOCK_SIZE_FACTOR = 1.0;
         const int MIN_BLOCK_SIZE = 10;
 
         _block_size = std::max( int(BLOCK_SIZE_FACTOR *
@@ -368,7 +373,7 @@ namespace lemon {
         Cost c, min = 0;
         int cnt = _block_size;
         int e;
-        for (e = _next_arc; e < _search_arc_num; ++e) {
+        for (e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < min) {
             min = c;
@@ -379,7 +384,7 @@ namespace lemon {
             cnt = _block_size;
           }
         }
-        for (e = 0; e < _next_arc; ++e) {
+        for (e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < min) {
             min = c;
@@ -409,7 +414,7 @@ namespace lemon {
       const IntVector  &_source;
       const IntVector  &_target;
       const CostVector &_cost;
-      const CharVector &_state;
+      const StateVector &_state;
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
@@ -470,7 +475,7 @@ namespace lemon {
         // Major iteration: build a new candidate list
         min = 0;
         _curr_length = 0;
-        for (e = _next_arc; e < _search_arc_num; ++e) {
+        for (e = _next_arc; e != _search_arc_num; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < 0) {
             _candidates[_curr_length++] = e;
@@ -481,7 +486,7 @@ namespace lemon {
             if (_curr_length == _list_length) goto search_end;
           }
         }
-        for (e = 0; e < _next_arc; ++e) {
+        for (e = 0; e != _next_arc; ++e) {
           c = _state[e] * (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (c < 0) {
             _candidates[_curr_length++] = e;
@@ -493,8 +498,8 @@ namespace lemon {
           }
         }
         if (_curr_length == 0) return false;
-      
-      search_end:        
+
+      search_end:
         _minor_count = 1;
         _next_arc = e;
         return true;
@@ -512,7 +517,7 @@ namespace lemon {
       const IntVector  &_source;
       const IntVector  &_target;
       const CostVector &_cost;
-      const CharVector &_state;
+      const StateVector &_state;
       const CostVector &_pi;
       int &_in_arc;
       int _search_arc_num;
@@ -565,7 +570,7 @@ namespace lemon {
       bool findEnteringArc() {
         // Check the current candidate list
         int e;
-        for (int i = 0; i < _curr_length; ++i) {
+        for (int i = 0; i != _curr_length; ++i) {
           e = _candidates[i];
           _cand_cost[e] = _state[e] *
             (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
@@ -578,7 +583,7 @@ namespace lemon {
         int cnt = _block_size;
         int limit = _head_length;
 
-        for (e = _next_arc; e < _search_arc_num; ++e) {
+        for (e = _next_arc; e != _search_arc_num; ++e) {
           _cand_cost[e] = _state[e] *
             (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (_cand_cost[e] < 0) {
@@ -590,7 +595,7 @@ namespace lemon {
             cnt = _block_size;
           }
         }
-        for (e = 0; e < _next_arc; ++e) {
+        for (e = 0; e != _next_arc; ++e) {
           _cand_cost[e] = _state[e] *
             (_cost[e] + _pi[_source[e]] - _pi[_target[e]]);
           if (_cand_cost[e] < 0) {
@@ -603,7 +608,7 @@ namespace lemon {
           }
         }
         if (_curr_length == 0) return false;
-        
+
       search_end:
 
         // Make heap of the candidate list (approximating a partial sort)
@@ -629,7 +634,7 @@ namespace lemon {
     ///
     /// \param graph The digraph the algorithm runs on.
     /// \param arc_mixing Indicate if the arcs have to be stored in a
-    /// mixed order in the internal data structure. 
+    /// mixed order in the internal data structure.
     /// In special cases, it could lead to better overall performance,
     /// but it is usually slower. Therefore it is disabled by default.
     NetworkSimplex(const GR& graph, bool arc_mixing = false) :
@@ -644,7 +649,7 @@ namespace lemon {
         "The flow type of NetworkSimplex must be signed");
       LEMON_ASSERT(std::numeric_limits<Cost>::is_signed,
         "The cost type of NetworkSimplex must be signed");
-        
+
       // Reset data structures
       reset();
     }
@@ -758,7 +763,7 @@ namespace lemon {
       _supply[_node_id[t]] = -k;
       return *this;
     }
-    
+
     /// \brief Set the type of the supply constraints.
     ///
     /// This function sets the type of the supply/demand constraints.
@@ -784,7 +789,7 @@ namespace lemon {
     ///
     /// This function runs the algorithm.
     /// The paramters can be specified using functions \ref lowerMap(),
-    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(), 
+    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply(),
     /// \ref supplyType().
     /// For example,
     /// \code
@@ -939,12 +944,12 @@ namespace lemon {
           _target[i] = _node_id[_graph.target(a)];
         }
       }
-      
+
       // Reset parameters
       resetParams();
       return *this;
     }
-    
+
     /// @}
 
     /// \name Query Functions
@@ -1084,7 +1089,7 @@ namespace lemon {
         _flow[i] = 0;
         _state[i] = STATE_LOWER;
       }
-      
+
       // Set data for the artificial root node
       _root = _node_num;
       _parent[_root] = -1;
@@ -1258,7 +1263,7 @@ namespace lemon {
       // Search the cycle along the path form the second node to the root
       for (int u = second; u != join; u = _parent[u]) {
         e = _pred[u];
-        d = _forward[u] ? 
+        d = _forward[u] ?
           (_cap[e] >= MAX ? INF : _cap[e] - _flow[e]) : _flow[e];
         if (d <= delta) {
           delta = d;
@@ -1360,7 +1365,7 @@ namespace lemon {
       }
 
       // Update _rev_thread using the new _thread values
-      for (int i = 0; i < int(_dirty_revs.size()); ++i) {
+      for (int i = 0; i != int(_dirty_revs.size()); ++i) {
         u = _dirty_revs[i];
         _rev_thread[_thread[u]] = u;
       }
@@ -1432,6 +1437,100 @@ namespace lemon {
       }
     }
 
+    // Heuristic initial pivots
+    bool initialPivots() {
+      Value curr, total = 0;
+      std::vector<Node> supply_nodes, demand_nodes;
+      for (NodeIt u(_graph); u != INVALID; ++u) {
+        curr = _supply[_node_id[u]];
+        if (curr > 0) {
+          total += curr;
+          supply_nodes.push_back(u);
+        }
+        else if (curr < 0) {
+          demand_nodes.push_back(u);
+        }
+      }
+      if (_sum_supply > 0) total -= _sum_supply;
+      if (total <= 0) return true;
+
+      IntVector arc_vector;
+      if (_sum_supply >= 0) {
+        if (supply_nodes.size() == 1 && demand_nodes.size() == 1) {
+          // Perform a reverse graph search from the sink to the source
+          typename GR::template NodeMap<bool> reached(_graph, false);
+          Node s = supply_nodes[0], t = demand_nodes[0];
+          std::vector<Node> stack;
+          reached[t] = true;
+          stack.push_back(t);
+          while (!stack.empty()) {
+            Node u, v = stack.back();
+            stack.pop_back();
+            if (v == s) break;
+            for (InArcIt a(_graph, v); a != INVALID; ++a) {
+              if (reached[u = _graph.source(a)]) continue;
+              int j = _arc_id[a];
+              if (_cap[j] >= total) {
+                arc_vector.push_back(j);
+                reached[u] = true;
+                stack.push_back(u);
+              }
+            }
+          }
+        } else {
+          // Find the min. cost incomming arc for each demand node
+          for (int i = 0; i != int(demand_nodes.size()); ++i) {
+            Node v = demand_nodes[i];
+            Cost c, min_cost = std::numeric_limits<Cost>::max();
+            Arc min_arc = INVALID;
+            for (InArcIt a(_graph, v); a != INVALID; ++a) {
+              c = _cost[_arc_id[a]];
+              if (c < min_cost) {
+                min_cost = c;
+                min_arc = a;
+              }
+            }
+            if (min_arc != INVALID) {
+              arc_vector.push_back(_arc_id[min_arc]);
+            }
+          }
+        }
+      } else {
+        // Find the min. cost outgoing arc for each supply node
+        for (int i = 0; i != int(supply_nodes.size()); ++i) {
+          Node u = supply_nodes[i];
+          Cost c, min_cost = std::numeric_limits<Cost>::max();
+          Arc min_arc = INVALID;
+          for (OutArcIt a(_graph, u); a != INVALID; ++a) {
+            c = _cost[_arc_id[a]];
+            if (c < min_cost) {
+              min_cost = c;
+              min_arc = a;
+            }
+          }
+          if (min_arc != INVALID) {
+            arc_vector.push_back(_arc_id[min_arc]);
+          }
+        }
+      }
+
+      // Perform heuristic initial pivots
+      for (int i = 0; i != int(arc_vector.size()); ++i) {
+        in_arc = arc_vector[i];
+        if (_state[in_arc] * (_cost[in_arc] + _pi[_source[in_arc]] -
+            _pi[_target[in_arc]]) >= 0) continue;
+        findJoinNode();
+        bool change = findLeavingArc();
+        if (delta >= MAX) return false;
+        changeFlow(change);
+        if (change) {
+          updateTreeStructure();
+          updatePotential();
+        }
+      }
+      return true;
+    }
+
     // Execute the algorithm
     ProblemType start(PivotRule pivot_rule) {
       // Select the pivot rule implementation
@@ -1454,6 +1553,9 @@ namespace lemon {
     ProblemType start() {
       PivotRuleImpl pivot(*this);
 
+      // Perform heuristic initial pivots
+      if (!initialPivots()) return UNBOUNDED;
+
       // Execute the Network Simplex algorithm
       while (pivot.findEnteringArc()) {
         findJoinNode();
@@ -1465,7 +1567,7 @@ namespace lemon {
           updatePotential();
         }
       }
-      
+
       // Check feasibility
       for (int e = _search_arc_num; e != _all_arc_num; ++e) {
         if (_flow[e] != 0) return INFEASIBLE;
@@ -1482,7 +1584,7 @@ namespace lemon {
           }
         }
       }
-      
+
       // Shift potentials to meet the requirements of the GEQ/LEQ type
       // optimality conditions
       if (_sum_supply == 0) {
