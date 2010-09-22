@@ -1,9 +1,85 @@
+2010-10-21 Version 1.0.6 released
+
+        Bugfix release.
+
+        #366: Fix Pred[Matrix]MapPath::empty()
+        #371: Bug fix in (di)graphCopy()
+              The target graph is cleared before adding nodes and arcs/edges.
+
+
+2010-03-08 Version 1.0.5 released
+
+        Bugfix release.
+
+        #250: Fix in pathSource() and pathTarget()
+        #321: Use pathCopy(from,to) instead of copyPath(to,from)
+        #330: Bug fix in map_extender.h
+        #335: Fix clear() function in ExtendFindEnum (#335)
+        #336: Fix the date field comment of graphToEps() output
+
+2009-05-05 Version 1.0.4 released
+
+        Bugfix release.
+
+        #274,#280: Install lemon/config.h and fix its bad include by core.h
+        #275: Prefix macro names with LEMON_ in lemon/config.h
+        ----: Small script for making the release tarballs added
+        ----: Minor improvement in unify-sources.sh (a76f55d7d397)
+
 2009-03-27 LEMON joins to the COIN-OR initiative
 
         COIN-OR (Computational Infrastructure for Operations Research,
         http://www.coin-or.org) project is an initiative to spur the
         development of open-source software for the operations research
         community.
+
+2009-03-26 Version 1.0.3 released
+
+        Bugfix release, mainly targeting better AIX/xlC and WIN32
+        compatibility.
+
+        ----: Minor clarification in the LICENSE file
+        ----: Add missing unistd.h include to time_measure.h
+        #204: Compilation bug fixed in graph_to_eps.h with VS2005
+        #214,#215: windows.h is never be included by lemon headers
+        #230: Build systems check the availability of 'long long' type
+        #229: Default implementation of Tolerance<> is used for integer types
+        #211,#212: Various fixes for compiling on AIX
+        ----: Improvements in CMAKE config
+              - docs is installed in share/doc/
+              - detects newer versions of Ghostscript
+        #239: Fix missing 'inline' specifier in time_measure.h
+        
+2009-01-23 Version 1.0.2 released
+
+        Bugfix release.
+
+        #193: Bugfix in GraphReader::skipSection()
+        #195: Bugfix in ConEdgeIt()
+        #197: Bugfix in heap unionfind
+              * This bug affects Edmond's general matching algorithms.
+                (Not available in this release.)
+        #207: Fix 'make install' without 'make html' using CMAKE
+        #208: Suppress or fix VS2008 compilation warnings
+        ----: Update the LEMON icon
+        ----: Enable the component-based installer
+              (in installers made by CPACK)
+        ----: Set the proper version for CMAKE in the tarballs
+              (made by autotools).
+
+2008-12-06 Version 1.0.1 released
+
+        Bugfix release.
+
+        #170: Bugfix SmartDigraph::split()
+        #171: Bugfix in SmartGraph::restoreSnapshot()
+        #172: Extended test cases for graphs and digraphs
+        #173: Bugfix in Random
+              * operator()s always return a double now
+              * the faulty real<Num>(Num) and real<Num>(Num,Num)
+                have been removed
+        #187: Remove DijkstraWidestPathOperationTraits
+        #61:  Bugfix in DfsVisit
 
 2008-10-13 Version 1.0 released
 
