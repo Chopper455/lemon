@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -25,16 +25,28 @@
 
 #include <lemon/lp_base.h>
 
-// forward declaration
-#if !defined _GLP_PROB && !defined GLP_PROB
-#define _GLP_PROB
-#define GLP_PROB
-typedef struct { double _opaque_prob; } glp_prob;
-/* LP/MIP problem object */
-#endif
-
 namespace lemon {
 
+  namespace _solver_bits {
+    class VoidPtr {
+    private:
+      void *_ptr;
+    public:
+      VoidPtr() : _ptr(0) {}
+
+      template <typename T>
+      VoidPtr(T* ptr) : _ptr(reinterpret_cast<void*>(ptr)) {}
+
+      template <typename T>
+      VoidPtr& operator=(T* ptr) {
+        _ptr = reinterpret_cast<void*>(ptr);
+        return *this;
+      }
+
+      template <typename T>
+      operator T*() const { return reinterpret_cast<T*>(_ptr); }
+    };
+  }
 
   /// \brief Base interface for the GLPK LP and MIP solver
   ///
@@ -43,8 +55,7 @@ namespace lemon {
   class GlpkBase : virtual public LpBase {
   protected:
 
-    typedef glp_prob LPX;
-    glp_prob* lp;
+    _solver_bits::VoidPtr lp;
 
     GlpkBase();
     GlpkBase(const GlpkBase&);
@@ -54,6 +65,7 @@ namespace lemon {
 
     virtual int _addCol();
     virtual int _addRow();
+    virtual int _addRow(Value l, ExprIterator b, ExprIterator e, Value u);
 
     virtual void _eraseCol(int i);
     virtual void _eraseRow(int i);
@@ -112,19 +124,19 @@ namespace lemon {
         freeEnv();
       }
     };
-    
+
     static FreeEnvHelper freeEnvHelper;
 
   protected:
-    
+
     int _message_level;
-    
+
   public:
 
     ///Pointer to the underlying GLPK data structure.
-    LPX *lpx() {return lp;}
+    _solver_bits::VoidPtr lpx() {return lp;}
     ///Const pointer to the underlying GLPK data structure.
-    const LPX *lpx() const {return lp;}
+    _solver_bits::VoidPtr lpx() const {return lp;}
 
     ///Returns the constraint identifier understood by GLPK.
     int lpxRow(Row r) const { return rows(id(r)); }
