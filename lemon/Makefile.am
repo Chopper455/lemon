@@ -90,6 +90,7 @@ lemon_HEADERS += \
 	lemon/gomory_hu.h \
 	lemon/graph_to_eps.h \
 	lemon/grid_graph.h \
+	lemon/grosso_locatelli_pullan_mc.h \
 	lemon/hartmann_orlin_mmc.h \
 	lemon/howard_mmc.h \
 	lemon/hypercube_graph.h \
@@ -106,6 +107,8 @@ lemon_HEADERS += \
 	lemon/matching.h \
 	lemon/math.h \
 	lemon/min_cost_arborescence.h \
+	lemon/max_cardinality_search.h \
+	lemon/nagamochi_ibaraki.h \
 	lemon/nauty_reader.h \
 	lemon/network_simplex.h \
 	lemon/pairing_heap.h \

@@ -31,9 +31,12 @@ SET(TESTS
   kruskal_test
   maps_test
   matching_test
+  max_cardinality_search_test
+  max_clique_test
   min_cost_arborescence_test
   min_cost_flow_test
   min_mean_cycle_test
+  nagamochi_ibaraki_test
   path_test
   planarity_test
   preflow_test
@@ -45,7 +48,12 @@ SET(TESTS
 )
 
 IF(LEMON_HAVE_LP)
-  ADD_EXECUTABLE(lp_test lp_test.cc)
+  IF(${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
+    ADD_EXECUTABLE(lp_test lp_test.cc)
+  ELSE()
+    ADD_EXECUTABLE(lp_test EXCLUDE_FROM_ALL lp_test.cc)
+  ENDIF()
+
   SET(LP_TEST_LIBS lemon)
 
   IF(LEMON_HAVE_GLPK)
@@ -81,7 +89,12 @@ IF(LEMON_HAVE_LP)
 ENDIF()
 
 IF(LEMON_HAVE_MIP)
-  ADD_EXECUTABLE(mip_test mip_test.cc)
+  IF(${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
+    ADD_EXECUTABLE(mip_test mip_test.cc)
+  ELSE()
+    ADD_EXECUTABLE(mip_test EXCLUDE_FROM_ALL mip_test.cc)
+  ENDIF()
+
   SET(MIP_TEST_LIBS lemon)
 
   IF(LEMON_HAVE_GLPK)
@@ -117,7 +130,12 @@ IF(LEMON_HAVE_MIP)
 ENDIF()
 
 FOREACH(TEST_NAME ${TESTS})
-  ADD_EXECUTABLE(${TEST_NAME} ${TEST_NAME}.cc)
+  IF(${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
+    ADD_EXECUTABLE(${TEST_NAME} ${TEST_NAME}.cc)
+  ELSE()
+    ADD_EXECUTABLE(${TEST_NAME} EXCLUDE_FROM_ALL ${TEST_NAME}.cc)
+  ENDIF()
   TARGET_LINK_LIBRARIES(${TEST_NAME} lemon)
   ADD_TEST(${TEST_NAME} ${TEST_NAME})
+  ADD_DEPENDENCIES(check ${TEST_NAME})
 ENDFOREACH()

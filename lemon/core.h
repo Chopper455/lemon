@@ -394,6 +394,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename ArcRefMap>
       static void copy(const From& from, Digraph &to,
                        NodeRefMap& nodeRefMap, ArcRefMap& arcRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -421,6 +422,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename EdgeRefMap>
       static void copy(const From& from, Graph &to,
                        NodeRefMap& nodeRefMap, EdgeRefMap& edgeRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -444,6 +446,25 @@ namespace lemon {
     };
 
   }
+
+  /// \brief Check whether a graph is undirected.
+  ///
+  /// This function returns \c true if the given graph is undirected.
+#ifdef DOXYGEN
+  template <typename GR>
+  bool undirected(const GR& g) { return false; }
+#else
+  template <typename GR>
+  typename enable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return true;
+  }
+  template <typename GR>
+  typename disable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return false;
+  }
+#endif
 
   /// \brief Class to copy a digraph.
   ///

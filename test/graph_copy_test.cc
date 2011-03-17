@@ -18,6 +18,7 @@
 
 #include <lemon/smart_graph.h>
 #include <lemon/list_graph.h>
+#include <lemon/static_graph.h>
 #include <lemon/lgf_reader.h>
 #include <lemon/error.h>
 
@@ -26,9 +27,11 @@
 using namespace std;
 using namespace lemon;
 
+template <typename GR>
 void digraph_copy_test() {
   const int nn = 10;
 
+  // Build a digraph
   SmartDigraph from;
   SmartDigraph::NodeMap<int> fnm(from);
   SmartDigraph::ArcMap<int> fam(from);
@@ -50,24 +53,28 @@ void digraph_copy_test() {
       if (i == 0 && j == 0) fa = arc;
     }
   }
+  
+  // Test digraph copy
+  GR to;
+  typename GR::template NodeMap<int> tnm(to);
+  typename GR::template ArcMap<int> tam(to);
+  typename GR::Node tn;
+  typename GR::Arc ta;
 
-  ListDigraph to;
-  ListDigraph::NodeMap<int> tnm(to);
-  ListDigraph::ArcMap<int> tam(to);
-  ListDigraph::Node tn;
-  ListDigraph::Arc ta;
+  SmartDigraph::NodeMap<typename GR::Node> nr(from);
+  SmartDigraph::ArcMap<typename GR::Arc> er(from);
 
-  SmartDigraph::NodeMap<ListDigraph::Node> nr(from);
-  SmartDigraph::ArcMap<ListDigraph::Arc> er(from);
-
-  ListDigraph::NodeMap<SmartDigraph::Node> ncr(to);
-  ListDigraph::ArcMap<SmartDigraph::Arc> ecr(to);
+  typename GR::template NodeMap<SmartDigraph::Node> ncr(to);
+  typename GR::template ArcMap<SmartDigraph::Arc> ecr(to);
 
   digraphCopy(from, to).
     nodeMap(fnm, tnm).arcMap(fam, tam).
     nodeRef(nr).arcRef(er).
     nodeCrossRef(ncr).arcCrossRef(ecr).
     node(fn, tn).arc(fa, ta).run();
+  
+  check(countNodes(from) == countNodes(to), "Wrong copy.");
+  check(countArcs(from) == countArcs(to), "Wrong copy.");
 
   for (SmartDigraph::NodeIt it(from); it != INVALID; ++it) {
     check(ncr[nr[it]] == it, "Wrong copy.");
@@ -81,20 +88,28 @@ void digraph_copy_test() {
     check(nr[from.target(it)] == to.target(er[it]), "Wrong copy.");
   }
 
-  for (ListDigraph::NodeIt it(to); it != INVALID; ++it) {
+  for (typename GR::NodeIt it(to); it != INVALID; ++it) {
     check(nr[ncr[it]] == it, "Wrong copy.");
   }
 
-  for (ListDigraph::ArcIt it(to); it != INVALID; ++it) {
+  for (typename GR::ArcIt it(to); it != INVALID; ++it) {
     check(er[ecr[it]] == it, "Wrong copy.");
   }
   check(tn == nr[fn], "Wrong copy.");
   check(ta == er[fa], "Wrong copy.");
+
+  // Test repeated copy
+  digraphCopy(from, to).run();
+  
+  check(countNodes(from) == countNodes(to), "Wrong copy.");
+  check(countArcs(from) == countArcs(to), "Wrong copy.");
 }
 
+template <typename GR>
 void graph_copy_test() {
   const int nn = 10;
 
+  // Build a graph
   SmartGraph from;
   SmartGraph::NodeMap<int> fnm(from);
   SmartGraph::ArcMap<int> fam(from);
@@ -122,27 +137,32 @@ void graph_copy_test() {
     }
   }
 
-  ListGraph to;
-  ListGraph::NodeMap<int> tnm(to);
-  ListGraph::ArcMap<int> tam(to);
-  ListGraph::EdgeMap<int> tem(to);
-  ListGraph::Node tn;
-  ListGraph::Arc ta;
-  ListGraph::Edge te;
+  // Test graph copy
+  GR to;
+  typename GR::template NodeMap<int> tnm(to);
+  typename GR::template ArcMap<int> tam(to);
+  typename GR::template EdgeMap<int> tem(to);
+  typename GR::Node tn;
+  typename GR::Arc ta;
+  typename GR::Edge te;
 
-  SmartGraph::NodeMap<ListGraph::Node> nr(from);
-  SmartGraph::ArcMap<ListGraph::Arc> ar(from);
-  SmartGraph::EdgeMap<ListGraph::Edge> er(from);
+  SmartGraph::NodeMap<typename GR::Node> nr(from);
+  SmartGraph::ArcMap<typename GR::Arc> ar(from);
+  SmartGraph::EdgeMap<typename GR::Edge> er(from);
 
-  ListGraph::NodeMap<SmartGraph::Node> ncr(to);
-  ListGraph::ArcMap<SmartGraph::Arc> acr(to);
-  ListGraph::EdgeMap<SmartGraph::Edge> ecr(to);
+  typename GR::template NodeMap<SmartGraph::Node> ncr(to);
+  typename GR::template ArcMap<SmartGraph::Arc> acr(to);
+  typename GR::template EdgeMap<SmartGraph::Edge> ecr(to);
 
   graphCopy(from, to).
     nodeMap(fnm, tnm).arcMap(fam, tam).edgeMap(fem, tem).
     nodeRef(nr).arcRef(ar).edgeRef(er).
     nodeCrossRef(ncr).arcCrossRef(acr).edgeCrossRef(ecr).
     node(fn, tn).arc(fa, ta).edge(fe, te).run();
+
+  check(countNodes(from) == countNodes(to), "Wrong copy.");
+  check(countEdges(from) == countEdges(to), "Wrong copy.");
+  check(countArcs(from) == countArcs(to), "Wrong copy.");
 
   for (SmartGraph::NodeIt it(from); it != INVALID; ++it) {
     check(ncr[nr[it]] == it, "Wrong copy.");
@@ -167,25 +187,35 @@ void graph_copy_test() {
           "Wrong copy.");
   }
 
-  for (ListGraph::NodeIt it(to); it != INVALID; ++it) {
+  for (typename GR::NodeIt it(to); it != INVALID; ++it) {
     check(nr[ncr[it]] == it, "Wrong copy.");
   }
 
-  for (ListGraph::ArcIt it(to); it != INVALID; ++it) {
+  for (typename GR::ArcIt it(to); it != INVALID; ++it) {
     check(ar[acr[it]] == it, "Wrong copy.");
   }
-  for (ListGraph::EdgeIt it(to); it != INVALID; ++it) {
+  for (typename GR::EdgeIt it(to); it != INVALID; ++it) {
     check(er[ecr[it]] == it, "Wrong copy.");
   }
   check(tn == nr[fn], "Wrong copy.");
   check(ta == ar[fa], "Wrong copy.");
   check(te == er[fe], "Wrong copy.");
+
+  // Test repeated copy
+  graphCopy(from, to).run();
+  
+  check(countNodes(from) == countNodes(to), "Wrong copy.");
+  check(countEdges(from) == countEdges(to), "Wrong copy.");
+  check(countArcs(from) == countArcs(to), "Wrong copy.");
 }
 
 
 int main() {
-  digraph_copy_test();
-  graph_copy_test();
+  digraph_copy_test<SmartDigraph>();
+  digraph_copy_test<ListDigraph>();
+  digraph_copy_test<StaticDigraph>();
+  graph_copy_test<SmartGraph>();
+  graph_copy_test<ListGraph>();
 
   return 0;
 }
