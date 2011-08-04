@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2009
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -287,7 +287,7 @@ namespace lemon {
     ///
     Timer(bool run=true) :_running(run) {_reset();}
 
-    ///\name Control the state of the timer
+    ///\name Control the State of the Timer
     ///Basically a Timer can be either running or stopped,
     ///but it provides a bit finer control on the execution.
     ///The \ref lemon::Timer "Timer" also counts the number of
@@ -375,7 +375,7 @@ namespace lemon {
 
     ///This function returns the number of stop() exections that is
     ///necessary to really stop the timer.
-    ///For example the timer
+    ///For example, the timer
     ///is running if and only if the return value is \c true
     ///(i.e. greater than
     ///zero).
@@ -395,7 +395,7 @@ namespace lemon {
 
     ///@}
 
-    ///\name Query Functions for the ellapsed time
+    ///\name Query Functions for the Ellapsed Time
 
     ///@{
 
