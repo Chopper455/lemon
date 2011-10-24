@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2009
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -212,7 +212,7 @@ namespace lemon
 
   /// 'Do nothing' version of Counter.
 
-  /// This class can be used in the same way as \ref Counter however it
+  /// This class can be used in the same way as \ref Counter, but it
   /// does not count at all and does not print report on destruction.
   ///
   /// Replacing a \ref Counter with a \ref NoCounter makes it possible

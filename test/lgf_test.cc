@@ -63,10 +63,10 @@ char test_lgf_bad2[] =
   "0 1\n";
 
 
-int main() 
+int main()
 {
   {
-    ListDigraph d; 
+    ListDigraph d;
     ListDigraph::Node s,t;
     ListDigraph::ArcMap<int> label(d);
     std::istringstream input(test_lgf);
@@ -93,7 +93,7 @@ int main()
   }
 
   {
-    ListDigraph d; 
+    ListDigraph d;
     std::istringstream input(test_lgf_nomap);
     digraphReader(d, input).
       run();
@@ -110,7 +110,7 @@ int main()
   }
 
   {
-    ListDigraph d; 
+    ListDigraph d;
     std::istringstream input(test_lgf_bad1);
     bool ok=false;
     try {
@@ -139,7 +139,7 @@ int main()
   }
 
   {
-    ListDigraph d; 
+    ListDigraph d;
     std::istringstream input(test_lgf_bad2);
     bool ok=false;
     try {
