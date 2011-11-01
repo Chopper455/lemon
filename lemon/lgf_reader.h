@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -562,7 +562,7 @@ namespace lemon {
     template <typename TDGR>
     friend DigraphReader<TDGR> digraphReader(TDGR& digraph, std::istream& is);
     template <typename TDGR>
-    friend DigraphReader<TDGR> digraphReader(TDGR& digraph, 
+    friend DigraphReader<TDGR> digraphReader(TDGR& digraph,
                                              const std::string& fn);
     template <typename TDGR>
     friend DigraphReader<TDGR> digraphReader(TDGR& digraph, const char *fn);
@@ -964,6 +964,13 @@ namespace lemon {
         std::string map;
         int index = 0;
         while (_reader_bits::readToken(line, map)) {
+          if(map == "-") {
+              if(index!=0)
+                throw FormatError("'-' is not allowed as a map name");
+              else if (line >> std::ws >> c)
+                throw FormatError("Extra character at the end of line");
+              else break;
+            }
           if (maps.find(map) != maps.end()) {
             std::ostringstream msg;
             msg << "Multiple occurence of arc map: " << map;
@@ -1187,14 +1194,14 @@ namespace lemon {
     /// @}
 
   };
-  
+
   /// \ingroup lemon_io
   ///
   /// \brief Return a \ref DigraphReader class
   ///
   /// This function just returns a \ref DigraphReader class.
   ///
-  /// With this function a digraph can be read from an 
+  /// With this function a digraph can be read from an
   /// \ref lgf-format "LGF" file or input stream with several maps and
   /// attributes. For example, there is network flow problem on a
   /// digraph, i.e. a digraph with a \e capacity map on the arcs and
@@ -1249,7 +1256,7 @@ namespace lemon {
 
   template <typename GR>
   class GraphReader;
- 
+
   template <typename TGR>
   GraphReader<TGR> graphReader(TGR& graph, std::istream& is = std::cin);
   template <typename TGR>
@@ -1386,7 +1393,7 @@ namespace lemon {
     template <typename TGR>
     friend GraphReader<TGR> graphReader(TGR& graph, std::istream& is);
     template <typename TGR>
-    friend GraphReader<TGR> graphReader(TGR& graph, const std::string& fn); 
+    friend GraphReader<TGR> graphReader(TGR& graph, const std::string& fn);
     template <typename TGR>
     friend GraphReader<TGR> graphReader(TGR& graph, const char *fn);
 
@@ -1834,6 +1841,13 @@ namespace lemon {
         std::string map;
         int index = 0;
         while (_reader_bits::readToken(line, map)) {
+          if(map == "-") {
+              if(index!=0)
+                throw FormatError("'-' is not allowed as a map name");
+              else if (line >> std::ws >> c)
+                throw FormatError("Extra character at the end of line");
+              else break;
+            }
           if (maps.find(map) != maps.end()) {
             std::ostringstream msg;
             msg << "Multiple occurence of edge map: " << map;
@@ -2063,9 +2077,9 @@ namespace lemon {
   ///
   /// \brief Return a \ref GraphReader class
   ///
-  /// This function just returns a \ref GraphReader class. 
+  /// This function just returns a \ref GraphReader class.
   ///
-  /// With this function a graph can be read from an 
+  /// With this function a graph can be read from an
   /// \ref lgf-format "LGF" file or input stream with several maps and
   /// attributes. For example, there is weighted matching problem on a
   /// graph, i.e. a graph with a \e weight map on the edges. This

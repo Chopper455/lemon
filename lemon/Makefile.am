@@ -1,5 +1,6 @@
 EXTRA_DIST += \
 	lemon/lemon.pc.in \
+	lemon/lemon.pc.cmake \
 	lemon/CMakeLists.txt \
 	lemon/config.h.cmake
 
@@ -92,7 +93,6 @@ lemon_HEADERS += \
 	lemon/lp.h \
 	lemon/lp_base.h \
 	lemon/lp_skeleton.h \
-	lemon/list_graph.h \
 	lemon/maps.h \
 	lemon/matching.h \
 	lemon/math.h \

@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -22,6 +22,7 @@
 #include <lemon/concept_check.h>
 #include <lemon/concepts/maps.h>
 #include <lemon/maps.h>
+#include <lemon/list_graph.h>
 
 #include "test_tools.h"
 
@@ -69,8 +70,10 @@ int main()
   checkConcept<WriteMap<A,C>, WriteMap<A,C> >();
   checkConcept<ReadWriteMap<A,B>, ReadWriteMap<A,B> >();
   checkConcept<ReadWriteMap<A,C>, ReadWriteMap<A,C> >();
-  checkConcept<ReferenceMap<A,B,B&,const B&>, ReferenceMap<A,B,B&,const B&> >();
-  checkConcept<ReferenceMap<A,C,C&,const C&>, ReferenceMap<A,C,C&,const C&> >();
+  checkConcept<ReferenceMap<A,B,B&,const B&>,
+               ReferenceMap<A,B,B&,const B&> >();
+  checkConcept<ReferenceMap<A,C,C&,const C&>,
+               ReferenceMap<A,C,C&,const C&> >();
 
   // NullMap
   {
@@ -199,7 +202,8 @@ int main()
     B b = functorToMap(F())[A()];
 
     checkConcept<ReadMap<A,B>, MapToFunctor<ReadMap<A,B> > >();
-    MapToFunctor<ReadMap<A,B> > map = MapToFunctor<ReadMap<A,B> >(ReadMap<A,B>());
+    MapToFunctor<ReadMap<A,B> > map =
+      MapToFunctor<ReadMap<A,B> >(ReadMap<A,B>());
 
     check(functorToMap(&func)[A()] == 3,
           "Something is wrong with FunctorToMap");
@@ -347,6 +351,40 @@ int main()
     for ( LoggerBoolMap<vec::iterator>::Iterator it = map2.begin();
           it != map2.end(); ++it )
       check(v1[i++] == *it, "Something is wrong with LoggerBoolMap");
+  }
+
+  // CrossRefMap
+  {
+    typedef ListDigraph Graph;
+    DIGRAPH_TYPEDEFS(Graph);
+
+    checkConcept<ReadWriteMap<Node, int>,
+                 CrossRefMap<Graph, Node, int> >();
+
+    Graph gr;
+    typedef CrossRefMap<Graph, Node, char> CRMap;
+    typedef CRMap::ValueIterator ValueIt;
+    CRMap map(gr);
+
+    Node n0 = gr.addNode();
+    Node n1 = gr.addNode();
+    Node n2 = gr.addNode();
+
+    map.set(n0, 'A');
+    map.set(n1, 'B');
+    map.set(n2, 'C');
+    map.set(n2, 'A');
+    map.set(n0, 'C');
+
+    check(map[n0] == 'C' && map[n1] == 'B' && map[n2] == 'A',
+          "Wrong CrossRefMap");
+    check(map('A') == n2 && map.inverse()['A'] == n2, "Wrong CrossRefMap");
+    check(map('B') == n1 && map.inverse()['B'] == n1, "Wrong CrossRefMap");
+    check(map('C') == n0 && map.inverse()['C'] == n0, "Wrong CrossRefMap");
+
+    ValueIt it = map.beginValue();
+    check(*it++ == 'A' && *it++ == 'B' && *it++ == 'C' &&
+          it == map.endValue(), "Wrong value iterator");
   }
 
   return 0;

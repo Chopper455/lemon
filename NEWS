@@ -1,3 +1,66 @@
+2011-08-08 Version 1.1.4 released
+
+        Bugfix release.
+
+        #392: Bug fix in Dfs::start(s,t)
+        #414: Fix wrong initialization in Preflow
+        #404: Update Doxygen configuration
+        #416: Support tests with valgrind
+        #418: Better Win CodeBlock/MinGW support
+        #419: Backport build environment improvements from the main branch
+              - Build of mip_test and lp_test precede the running of the tests
+              - Also search for coin libs under ${COIN_ROOT_DIR}/lib/coin
+              - Do not look for COIN_VOL libraries
+        #382: Allow lgf file without Arc maps
+        
+2010-10-21 Version 1.1.3 released
+
+        Bugfix release.
+
+        #366: Fix Pred[Matrix]MapPath::empty()
+        #371: Bug fix in (di)graphCopy()
+              The target graph is cleared before adding nodes and arcs/edges.
+
+        #356: Fix multiple execution bug in weighted matchings
+        #364: Add missing UndirectedTags
+        #368: Fix the usage of std::numeric_limits<>::min() in Network Simplex
+        #372: Fix a critical bug in preflow
+
+2010-03-08 Version 1.1.2 released
+
+        Bugfix release.
+
+        #317: Fix (and improve) error message in mip_test.cc
+              Remove unnecessary OsiCbc dependency
+        #250: Fix in pathSource() and pathTarget()
+        #322: Distribute LEMONConfig.cmake.in
+        #321: Use pathCopy(from,to) instead of copyPath(to,from)
+        #330: Bug fix in map_extender.h
+        #335: Fix clear() function in ExtendFindEnum
+        #337: Use void* as LPX object pointer
+        #336: Fix the date field comment of graphToEps() output
+        #323: Bug fix in Suurballe
+
+2009-10-03 Version 1.1.1 released
+
+        Bugfix release.
+
+        #295: Suppress MSVC warnings using pragmas
+        ----: Various CMAKE related improvements
+              * Remove duplications from doc/CMakeLists.txt
+              * Rename documentation install folder from 'docs' to 'html'
+              * Add tools/CMakeLists.txt to the tarball
+              * Generate and install LEMONConfig.cmake
+              * Change the label of the html project in Visual Studio
+              * Fix the check for the 'long long' type
+              * Put the version string into config.h
+              * Minor CMake improvements
+              * Set the version to 'hg-tip' if everything fails
+        #311: Add missing 'explicit' keywords
+        #302: Fix the implementation and doc of CrossRefMap
+        #308: Remove duplicate list_graph.h entry from source list
+        #307: Bug fix in Preflow and Circulation
+
 2009-05-13 Version 1.1 released
 
         This is the second stable release of the 1.x series. It
