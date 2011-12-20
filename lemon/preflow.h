@@ -374,7 +374,7 @@ namespace lemon {
     /// \brief Sets the tolerance used by algorithm.
     ///
     /// Sets the tolerance used by algorithm.
-    Preflow& tolerance(const Tolerance& tolerance) const {
+    Preflow& tolerance(const Tolerance& tolerance) {
       _tolerance = tolerance;
       return *this;
     }
@@ -383,7 +383,7 @@ namespace lemon {
     ///
     /// Returns a const reference to the tolerance.
     const Tolerance& tolerance() const {
-      return tolerance;
+      return _tolerance;
     }
 
     /// \name Execution Control
@@ -525,9 +525,6 @@ namespace lemon {
           if ((*_level)[u] == _level->maxLevel()) continue;
           _flow->set(e, (*_capacity)[e]);
           (*_excess)[u] += rem;
-          if (u != _target && !_level->active(u)) {
-            _level->activate(u);
-          }
         }
       }
       for (InArcIt e(_graph, _source); e != INVALID; ++e) {
@@ -537,11 +534,12 @@ namespace lemon {
           if ((*_level)[v] == _level->maxLevel()) continue;
           _flow->set(e, 0);
           (*_excess)[v] += rem;
-          if (v != _target && !_level->active(v)) {
-            _level->activate(v);
-          }
         }
       }
+      for (NodeIt n(_graph); n != INVALID; ++n) 
+        if(n!=_source && n!=_target && _tolerance.positive((*_excess)[n]))
+          _level->activate(n);
+          
       return true;
     }
 
@@ -558,12 +556,18 @@ namespace lemon {
     void startFirstPhase() {
       _phase = true;
 
-      Node n = _level->highestActive();
-      int level = _level->highestActiveLevel();
-      while (n != INVALID) {
+      while (true) {
         int num = _node_num;
 
-        while (num > 0 && n != INVALID) {
+        Node n = INVALID;
+        int level = -1;
+
+        while (num > 0) {
+          n = _level->highestActive();
+          if (n == INVALID) goto first_phase_done;
+          level = _level->highestActiveLevel();
+          --num;
+          
           Value excess = (*_excess)[n];
           int new_level = _level->maxLevel();
 
@@ -629,14 +633,22 @@ namespace lemon {
           } else {
             _level->deactivate(n);
           }
-
-          n = _level->highestActive();
-          level = _level->highestActiveLevel();
-          --num;
         }
 
         num = _node_num * 20;
-        while (num > 0 && n != INVALID) {
+        while (num > 0) {
+          while (level >= 0 && _level->activeFree(level)) {
+            --level;
+          }
+          if (level == -1) {
+            n = _level->highestActive();
+            level = _level->highestActiveLevel();
+            if (n == INVALID) goto first_phase_done;
+          } else {
+            n = _level->activeOn(level);
+          }
+          --num;
+
           Value excess = (*_excess)[n];
           int new_level = _level->maxLevel();
 
@@ -702,19 +714,9 @@ namespace lemon {
           } else {
             _level->deactivate(n);
           }
-
-          while (level >= 0 && _level->activeFree(level)) {
-            --level;
-          }
-          if (level == -1) {
-            n = _level->highestActive();
-            level = _level->highestActiveLevel();
-          } else {
-            n = _level->activeOn(level);
-          }
-          --num;
         }
       }
+    first_phase_done:;
     }
 
     /// \brief Starts the second phase of the preflow algorithm.
