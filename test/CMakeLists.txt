@@ -36,9 +36,12 @@ SET(TESTS
   lgf_test
   maps_test
   matching_test
+  max_cardinality_search_test
+  max_clique_test
   min_cost_arborescence_test
   min_cost_flow_test
   min_mean_cycle_test
+  nagamochi_ibaraki_test
   path_test
   planarity_test
   preflow_test
