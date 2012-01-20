@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -446,6 +446,25 @@ namespace lemon {
     };
 
   }
+
+  /// \brief Check whether a graph is undirected.
+  ///
+  /// This function returns \c true if the given graph is undirected.
+#ifdef DOXYGEN
+  template <typename GR>
+  bool undirected(const GR& g) { return false; }
+#else
+  template <typename GR>
+  typename enable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return true;
+  }
+  template <typename GR>
+  typename disable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return false;
+  }
+#endif
 
   /// \brief Class to copy a digraph.
   ///
@@ -1241,7 +1260,8 @@ namespace lemon {
 
   protected:
 
-    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type {
+    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type
+    {
       typedef typename ItemSetTraits<GR, Node>::template Map<Arc>::Type Parent;
 
     public:
@@ -1280,7 +1300,7 @@ namespace lemon {
       }
     };
 
-  protected: 
+  protected:
 
     const Digraph &_g;
     AutoNodeMap _head;
