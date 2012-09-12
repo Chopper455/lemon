@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2010
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -1556,7 +1556,7 @@ namespace lemon {
     void min() { _setSense(MIN); }
 
     ///Clears the problem
-    void clear() { _clear(); }
+    void clear() { _clear(); rows.clear(); cols.clear(); }
 
     /// Sets the message level of the solver
     void messageLevel(MessageLevel level) { _messageLevel(level); }
