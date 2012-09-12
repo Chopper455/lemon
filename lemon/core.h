@@ -447,6 +447,25 @@ namespace lemon {
 
   }
 
+  /// \brief Check whether a graph is undirected.
+  ///
+  /// This function returns \c true if the given graph is undirected.
+#ifdef DOXYGEN
+  template <typename GR>
+  bool undirected(const GR& g) { return false; }
+#else
+  template <typename GR>
+  typename enable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return true;
+  }
+  template <typename GR>
+  typename disable_if<UndirectedTagIndicator<GR>, bool>::type
+  undirected(const GR&) {
+    return false;
+  }
+#endif
+
   /// \brief Class to copy a digraph.
   ///
   /// Class to copy a digraph to another digraph (duplicate a digraph). The
@@ -1849,15 +1868,26 @@ namespace lemon {
     ///this operator. If you change the outgoing arcs of
     ///a single node \c n, then \ref refresh(Node) "refresh(n)" is enough.
     ///
-#ifdef DOXYGEN
-    Arc operator()(Node s, Node t, Arc prev=INVALID) const {}
-#else
-    using ArcLookUp<GR>::operator() ;
-    Arc operator()(Node s, Node t, Arc prev) const
+    Arc operator()(Node s, Node t, Arc prev=INVALID) const
     {
-      return prev==INVALID?(*this)(s,t):_next[prev];
+      if(prev==INVALID)
+        {
+          Arc f=INVALID;
+          Arc e;
+          for(e=_head[s];
+              e!=INVALID&&_g.target(e)!=t;
+              e = t < _g.target(e)?_left[e]:_right[e]) ;
+          while(e!=INVALID)
+            if(_g.target(e)==t)
+              {
+                f = e;
+                e = _left[e];
+              }
+            else e = _right[e];
+          return f;
+        }
+      else return _next[prev];
     }
-#endif
 
   };
 

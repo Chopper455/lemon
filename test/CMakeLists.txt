@@ -13,6 +13,7 @@ SET(VALGRIND_FLAGS "" CACHE STRING "Valgrind flags used by the tests.")
 
 SET(TESTS
   adaptors_test
+  arc_look_up_test
   bellman_ford_test
   bfs_test
   circulation_test
@@ -36,9 +37,12 @@ SET(TESTS
   lgf_test
   maps_test
   matching_test
+  max_cardinality_search_test
+  max_clique_test
   min_cost_arborescence_test
   min_cost_flow_test
   min_mean_cycle_test
+  nagamochi_ibaraki_test
   path_test
   planarity_test
   preflow_test
@@ -86,7 +90,7 @@ IF(LEMON_HAVE_LP)
     GET_TARGET_PROPERTY(TARGET_LOC lp_test LOCATION)
     GET_FILENAME_COMPONENT(TARGET_PATH ${TARGET_LOC} PATH)
     ADD_CUSTOM_COMMAND(TARGET lp_test POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${CPLEX_BIN_DIR}/cplex91.dll ${TARGET_PATH}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CPLEX_BIN_DIR}/cplex.dll ${TARGET_PATH}
     )
   ENDIF()
 ENDIF()
@@ -128,7 +132,7 @@ IF(LEMON_HAVE_MIP)
     GET_TARGET_PROPERTY(TARGET_LOC mip_test LOCATION)
     GET_FILENAME_COMPONENT(TARGET_PATH ${TARGET_LOC} PATH)
     ADD_CUSTOM_COMMAND(TARGET mip_test POST_BUILD
-      COMMAND ${CMAKE_COMMAND} -E copy ${CPLEX_BIN_DIR}/cplex91.dll ${TARGET_PATH}
+      COMMAND ${CMAKE_COMMAND} -E copy ${CPLEX_BIN_DIR}/cplex.dll ${TARGET_PATH}
     )
   ENDIF()
 ENDIF()
