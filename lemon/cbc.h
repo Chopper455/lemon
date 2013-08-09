@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -16,7 +16,6 @@
  *
  */
 
-// -*- C++ -*-
 #ifndef LEMON_CBC_H
 #define LEMON_CBC_H
 
@@ -62,6 +61,7 @@ namespace lemon {
 
     virtual int _addCol();
     virtual int _addRow();
+    virtual int _addRow(Value l, ExprIterator b, ExprIterator e, Value u);
 
     virtual void _eraseCol(int i);
     virtual void _eraseRow(int i);
@@ -120,7 +120,7 @@ namespace lemon {
 
     int _message_level;
 
-    
+
 
   };
 

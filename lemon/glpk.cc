@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -56,6 +56,42 @@ namespace lemon {
   int GlpkBase::_addRow() {
     int i = glp_add_rows(lp, 1);
     glp_set_row_bnds(lp, i, GLP_FR, 0.0, 0.0);
+    return i;
+  }
+
+  int GlpkBase::_addRow(Value lo, ExprIterator b,
+                        ExprIterator e, Value up) {
+    int i = glp_add_rows(lp, 1);
+
+    if (lo == -INF) {
+      if (up == INF) {
+        glp_set_row_bnds(lp, i, GLP_FR, lo, up);
+      } else {
+        glp_set_row_bnds(lp, i, GLP_UP, lo, up);
+      }
+    } else {
+      if (up == INF) {
+        glp_set_row_bnds(lp, i, GLP_LO, lo, up);
+      } else if (lo != up) {
+        glp_set_row_bnds(lp, i, GLP_DB, lo, up);
+      } else {
+        glp_set_row_bnds(lp, i, GLP_FX, lo, up);
+      }
+    }
+
+    std::vector<int> indexes;
+    std::vector<Value> values;
+
+    indexes.push_back(0);
+    values.push_back(0);
+
+    for(ExprIterator it = b; it != e; ++it) {
+      indexes.push_back(it->first);
+      values.push_back(it->second);
+    }
+
+    glp_set_mat_row(lp, i, values.size() - 1,
+                    &indexes.front(), &values.front());
     return i;
   }
 
@@ -546,6 +582,15 @@ namespace lemon {
     }
   }
 
+  void GlpkBase::_write(std::string file, std::string format) const
+  {
+    if(format == "MPS")
+      glp_write_mps(lp, GLP_MPS_FILE, 0, file.c_str());
+    else if(format == "LP")
+      glp_write_lp(lp, 0, file.c_str());
+    else throw UnsupportedFormatError(format);
+  }
+
   GlpkBase::FreeEnvHelper GlpkBase::freeEnvHelper;
 
   // GlpkLp members
@@ -961,5 +1006,7 @@ namespace lemon {
   GlpkMip* GlpkMip::cloneSolver() const {return new GlpkMip(*this); }
 
   const char* GlpkMip::_solverName() const { return "GlpkMip"; }
+
+
 
 } //END OF NAMESPACE LEMON
