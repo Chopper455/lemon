@@ -1,3 +1,62 @@
+2013-08-10 Version 1.2.4 released
+
+        Bugfix release.
+
+        #432: Add missing doc/template.h and doc/references.bib to release
+              tarball
+        #433: Support shared library build
+        ----: Update CPLEX lookup
+        ----: Make CBC interface compatible with latest CBC releases
+        ----: Intel C++ compatibility fixes
+        #441: Fix buggy reinitialization in _solver_bits::VarIndex::clear()
+        #444: Bugfix in path copy constructors and assignment operators
+        #447: Bugfix in AllArcLookUp<>
+        #448: Bugfix in adaptor_test.cc
+        #449: Fix clang compilation warnings and errors
+        #440: Fix a bug + remove redundant typedefs in dimacs-solver
+        #453: Avoid GCC 4.7 compiler warnings
+        #445: Fix missing initialization in CplexEnv::CplexEnv()
+        #461: Bugfix in assert.h
+        #470: Fix compilation issues related to various gcc versions
+        #439: Bugfix in biNodeConnected()
+        #469: Bugfix in test/maps_test.cc
+
+2011-11-09 Version 1.2.3 released
+
+        Bugfix release.
+
+        #428: Add missing lemon/lemon.pc.cmake to the release tarball
+        #429: Fix VS warnings
+        #430: Fix LpBase::Constr two-side limit bug
+
+2011-08-08 Version 1.2.2 released
+
+        Bugfix release.
+
+        #392: Bug fix in Dfs::start(s,t)
+        #414: Fix wrong initialization in Preflow
+        #404: Update Doxygen configuration
+        #416: Support tests with valgrind
+        #418: Better Win CodeBlock/MinGW support
+        #419: Backport build environment improvements from the main branch
+              - Build of mip_test and lp_test precede the running of the tests
+              - Also search for coin libs under ${COIN_ROOT_DIR}/lib/coin
+              - Do not look for COIN_VOL libraries
+        #382: Allow lgf file without Arc maps
+        #417: Bug fix in CostScaling
+
+2010-10-21 Version 1.2.1 released
+
+        Bugfix release.
+
+        #366: Fix Pred[Matrix]MapPath::empty()
+        #371: Bug fix in (di)graphCopy()
+              The target graph is cleared before adding nodes and arcs/edges.
+
+        #364: Add missing UndirectedTags
+        #368: Fix the usage of std::numeric_limits<>::min() in Network Simplex
+        #372: Fix a critical bug in preflow
+
 2010-03-19 Version 1.2 released
 
         This is major feature release
