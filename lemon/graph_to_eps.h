@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -222,7 +222,6 @@ template<class T> class GraphToEps : public T
   using T::_title;
   using T::_copyright;
 
-  using T::NodeTextColorType;
   using T::CUST_COL;
   using T::DIST_COL;
   using T::DIST_BW;
@@ -684,9 +683,9 @@ public:
       os << cbuf;
 #else
       os << bits::getWinFormattedDate();
+      os << std::endl;
 #endif
     }
-    os << std::endl;
 
     if (_autoArcWidthScale) {
       double max_w=0;

@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -312,7 +312,7 @@ namespace lemon {
 
         /// Sets the iterator to the first arc of the given digraph.
         ///
-        explicit ArcIt(const Digraph& g) { ignore_unused_variable_warning(g); }
+        explicit ArcIt(const Digraph& g) { ::lemon::ignore_unused_variable_warning(g); }
         /// Sets the iterator to the given arc.
 
         /// Sets the iterator to the given arc of the given digraph.
@@ -434,7 +434,7 @@ namespace lemon {
 
       private:
         ///Copy constructor
-        NodeMap(const NodeMap& nm) : 
+        NodeMap(const NodeMap& nm) :
           ReferenceMap<Node, T, T&, const T&>(nm) { }
         ///Assignment operator
         template <typename CMap>

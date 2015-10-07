@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -35,6 +35,17 @@
 // C4996: 'function': was declared deprecated
 #ifdef _MSC_VER
 #pragma warning( disable : 4250 4355 4503 4800 4996 )
+#endif
+
+#ifdef __GNUC__
+#define GCC_VERSION (__GNUC__ * 10000                   \
+                     + __GNUC_MINOR__ * 100             \
+                     + __GNUC_PATCHLEVEL__)
+#endif
+
+#if GCC_VERSION >= 40800
+// Needed by the [DI]GRAPH_TYPEDEFS marcos for gcc 4.8
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #endif
 
 ///\file
@@ -394,6 +405,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename ArcRefMap>
       static void copy(const From& from, Digraph &to,
                        NodeRefMap& nodeRefMap, ArcRefMap& arcRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -421,6 +433,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename EdgeRefMap>
       static void copy(const From& from, Graph &to,
                        NodeRefMap& nodeRefMap, EdgeRefMap& edgeRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -1239,7 +1252,8 @@ namespace lemon {
 
   protected:
 
-    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type {
+    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type
+    {
       typedef typename ItemSetTraits<GR, Node>::template Map<Arc>::Type Parent;
 
     public:
@@ -1278,7 +1292,7 @@ namespace lemon {
       }
     };
 
-  protected: 
+  protected:
 
     const Digraph &_g;
     AutoNodeMap _head;
@@ -1846,15 +1860,26 @@ namespace lemon {
     ///this operator. If you change the outgoing arcs of
     ///a single node \c n, then \ref refresh(Node) "refresh(n)" is enough.
     ///
-#ifdef DOXYGEN
-    Arc operator()(Node s, Node t, Arc prev=INVALID) const {}
-#else
-    using ArcLookUp<GR>::operator() ;
-    Arc operator()(Node s, Node t, Arc prev) const
+    Arc operator()(Node s, Node t, Arc prev=INVALID) const
     {
-      return prev==INVALID?(*this)(s,t):_next[prev];
+      if(prev==INVALID)
+        {
+          Arc f=INVALID;
+          Arc e;
+          for(e=_head[s];
+              e!=INVALID&&_g.target(e)!=t;
+              e = t < _g.target(e)?_left[e]:_right[e]) ;
+          while(e!=INVALID)
+            if(_g.target(e)==t)
+              {
+                f = e;
+                e = _left[e];
+              }
+            else e = _right[e];
+          return f;
+        }
+      else return _next[prev];
     }
-#endif
 
   };
 

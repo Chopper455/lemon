@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -66,6 +66,7 @@ void checkGraphBuild() {
 
   Edge e2 = G.addEdge(n2, n1),
        e3 = G.addEdge(n2, n3);
+  ::lemon::ignore_unused_variable_warning(e2,e3);
 
   checkGraphNodeList(G, 3);
   checkGraphEdgeList(G, 3);
@@ -98,6 +99,7 @@ void checkGraphAlter() {
   Edge e1 = G.addEdge(n1, n2), e2 = G.addEdge(n2, n1),
        e3 = G.addEdge(n2, n3), e4 = G.addEdge(n1, n4),
        e5 = G.addEdge(n4, n3);
+  ::lemon::ignore_unused_variable_warning(e1,e3,e4,e5);
 
   checkGraphNodeList(G, 4);
   checkGraphEdgeList(G, 5);
@@ -177,6 +179,7 @@ void checkGraphErase() {
   Edge e1 = G.addEdge(n1, n2), e2 = G.addEdge(n2, n1),
        e3 = G.addEdge(n2, n3), e4 = G.addEdge(n1, n4),
        e5 = G.addEdge(n4, n3);
+  ::lemon::ignore_unused_variable_warning(e1,e3,e4,e5);
 
   // Check edge deletion
   G.erase(e2);
@@ -217,6 +220,7 @@ void checkGraphSnapshot() {
   Node n1 = G.addNode(), n2 = G.addNode(), n3 = G.addNode();
   Edge e1 = G.addEdge(n1, n2), e2 = G.addEdge(n2, n1),
        e3 = G.addEdge(n2, n3);
+  ::lemon::ignore_unused_variable_warning(e1,e2,e3);
 
   checkGraphNodeList(G, 3);
   checkGraphEdgeList(G, 3);
@@ -264,7 +268,7 @@ void checkGraphSnapshot() {
   checkGraphNodeList(G, 4);
   checkGraphEdgeList(G, 3);
   checkGraphArcList(G, 6);
-  
+
   G.addEdge(G.addNode(), G.addNode());
 
   snapshot.restore();
@@ -381,6 +385,7 @@ void checkGraphValidity() {
   Edge
     e1 = g.addEdge(n1, n2),
     e2 = g.addEdge(n2, n3);
+  ::lemon::ignore_unused_variable_warning(e2);
 
   check(g.valid(n1), "Wrong validity check");
   check(g.valid(e1), "Wrong validity check");
@@ -513,12 +518,13 @@ void checkHypercubeGraph(int dim) {
 
   G.resize(dim);
   check(G.dimension() == dim, "Wrong dimension");
-  
+
   checkGraphNodeList(G, 1 << dim);
   checkGraphEdgeList(G, dim * (1 << (dim-1)));
   checkGraphArcList(G, dim * (1 << dim));
 
   Node n = G.nodeFromId(dim);
+  ::lemon::ignore_unused_variable_warning(n);
 
   for (NodeIt n(G); n != INVALID; ++n) {
     checkGraphIncEdgeList(G, n, dim);

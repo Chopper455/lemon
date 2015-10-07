@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -61,6 +61,7 @@ void checkBfsCompile()
   Node s, t, n;
   Arc e;
   int l, i;
+  ::lemon::ignore_unused_variable_warning(l,i);
   bool b;
   BType::DistMap d(G);
   BType::PredMap p(G);
@@ -83,7 +84,7 @@ void checkBfsCompile()
     n = const_bfs_test.nextNode();
     b = const_bfs_test.emptyQueue();
     i = const_bfs_test.queueSize();
-    
+
     bfs_test.start();
     bfs_test.start(t);
     bfs_test.start(nm);
@@ -104,12 +105,12 @@ void checkBfsCompile()
       ::SetStandardProcessedMap
       ::SetProcessedMap<concepts::WriteMap<Node,bool> >
       ::Create bfs_test(G);
-      
+
     concepts::ReadWriteMap<Node,Arc> pred_map;
     concepts::ReadWriteMap<Node,int> dist_map;
     concepts::ReadWriteMap<Node,bool> reached_map;
     concepts::WriteMap<Node,bool> processed_map;
-    
+
     bfs_test
       .predMap(pred_map)
       .distMap(dist_map)
@@ -119,7 +120,7 @@ void checkBfsCompile()
     bfs_test.run(s);
     bfs_test.run(s,t);
     bfs_test.run();
-    
+
     bfs_test.init();
     bfs_test.addSource(s);
     n = bfs_test.processNextNode();
@@ -128,7 +129,7 @@ void checkBfsCompile()
     n = bfs_test.nextNode();
     b = bfs_test.emptyQueue();
     i = bfs_test.queueSize();
-    
+
     bfs_test.start();
     bfs_test.start(t);
     bfs_test.start(nm);
@@ -150,6 +151,8 @@ void checkBfsFunctionCompile()
 
   Digraph g;
   bool b;
+  ::lemon::ignore_unused_variable_warning(b);
+
   bfs(g).run(Node());
   b=bfs(g).run(Node(),Node());
   bfs(g).run();

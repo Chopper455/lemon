@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -65,8 +65,10 @@ void checkBellmanFordCompile()
   Node s, t, n;
   Arc e;
   Value l;
+  ::lemon::ignore_unused_variable_warning(l);
   int k=3;
   bool b;
+  ::lemon::ignore_unused_variable_warning(b);
   BF::DistMap d(gr);
   BF::PredMap p(gr);
   LengthMap length;
@@ -97,7 +99,7 @@ void checkBellmanFordCompile()
     p  = const_bf_test.predMap();
     pp = const_bf_test.path(t);
     pp = const_bf_test.negativeCycle();
-    
+
     for (BF::ActiveIt it(const_bf_test); it != INVALID; ++it) {}
   }
   {
@@ -109,7 +111,7 @@ void checkBellmanFordCompile()
     LengthMap length_map;
     concepts::ReadWriteMap<Node,Arc> pred_map;
     concepts::ReadWriteMap<Node,Value> dist_map;
-    
+
     bf_test
       .lengthMap(length_map)
       .predMap(pred_map)
@@ -147,6 +149,8 @@ void checkBellmanFordFunctionCompile()
 
   Digraph g;
   bool b;
+  ::lemon::ignore_unused_variable_warning(b);
+
   bellmanFord(g,LengthMap()).run(Node());
   b = bellmanFord(g,LengthMap()).run(Node(),Node());
   bellmanFord(g,LengthMap())
@@ -188,9 +192,9 @@ void checkBellmanFord() {
   check(checkPath(gr, p), "path() found a wrong path.");
   check(pathSource(gr, p) == s, "path() found a wrong path.");
   check(pathTarget(gr, p) == t, "path() found a wrong path.");
-  
+
   ListPath<Digraph> path;
-  Value dist;
+  Value dist = 0;
   bool reached = bellmanFord(gr,length).path(path).dist(dist).run(s,t);
 
   check(reached && dist == -1, "Bellman-Ford found a wrong path.");
@@ -227,18 +231,18 @@ void checkBellmanFordNegativeCycle() {
 
   SmartDigraph gr;
   IntArcMap length(gr);
-  
+
   Node n1 = gr.addNode();
   Node n2 = gr.addNode();
   Node n3 = gr.addNode();
   Node n4 = gr.addNode();
-  
+
   Arc a1 = gr.addArc(n1, n2);
   Arc a2 = gr.addArc(n2, n2);
-  
+
   length[a1] = 2;
   length[a2] = -1;
-  
+
   {
     BellmanFord<SmartDigraph, IntArcMap> bf(gr, length);
     bf.run(n1);
@@ -246,21 +250,21 @@ void checkBellmanFordNegativeCycle() {
     check(p.length() == 1 && p.front() == p.back() && p.front() == a2,
           "Wrong negative cycle.");
   }
- 
+
   length[a2] = 0;
-  
+
   {
     BellmanFord<SmartDigraph, IntArcMap> bf(gr, length);
     bf.run(n1);
     check(bf.negativeCycle().empty(),
           "Negative cycle should not be found.");
   }
-  
+
   length[gr.addArc(n1, n3)] = 5;
   length[gr.addArc(n4, n3)] = 1;
   length[gr.addArc(n2, n4)] = 2;
   length[gr.addArc(n3, n2)] = -4;
-  
+
   {
     BellmanFord<SmartDigraph, IntArcMap> bf(gr, length);
     bf.init();

@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -41,10 +41,37 @@
 
 using namespace lemon;
 
+int countCols(LpBase & lp) {
+  int count=0;
+  for (LpBase::ColIt c(lp); c!=INVALID; ++c) ++count;
+  return count;
+}
+
+int countRows(LpBase & lp) {
+  int count=0;
+  for (LpBase::RowIt r(lp); r!=INVALID; ++r) ++count;
+  return count;
+}
+
+
 void lpTest(LpSolver& lp)
 {
 
   typedef LpSolver LP;
+
+  // Test LpBase::clear()
+  check(countRows(lp)==0, "Wrong number of rows");
+  check(countCols(lp)==0, "Wrong number of cols");
+  lp.addCol(); lp.addRow(); lp.addRow();
+  check(countRows(lp)==2, "Wrong number of rows");
+  check(countCols(lp)==1, "Wrong number of cols");
+  lp.clear();
+  check(countRows(lp)==0, "Wrong number of rows");
+  check(countCols(lp)==0, "Wrong number of cols");
+  lp.addCol(); lp.addCol(); lp.addCol(); lp.addRow();
+  check(countRows(lp)==1, "Wrong number of rows");
+  check(countCols(lp)==3, "Wrong number of cols");
+  lp.clear();
 
   std::vector<LP::Col> x(10);
   //  for(int i=0;i<10;i++) x.push_back(lp.addCol());
@@ -166,6 +193,19 @@ void lpTest(LpSolver& lp)
     c = ((2 >= e) >= 3);
     c = ((2 >= p1) >= 3);
 
+    { //Tests for #430
+      LP::Col v=lp.addCol();
+      LP::Constr c = v >= -3;
+      c = c <= 4;
+      LP::Constr c2;
+#if ( __GNUC__ == 4 ) && ( __GNUC_MINOR__ == 3 )
+      c2 = ( -3 <= v ) <= 4;
+#else
+      c2 = -3 <= v <= 4;
+#endif
+
+    }
+
     e[x[3]]=2;
     e[x[3]]=4;
     e[x[3]]=1;
@@ -205,8 +245,7 @@ void lpTest(LpSolver& lp)
 
   {
     LP::DualExpr e,f,g;
-    LP::Row p1 = INVALID, p2 = INVALID, p3 = INVALID,
-      p4 = INVALID, p5 = INVALID;
+    LP::Row p1 = INVALID, p2 = INVALID;
 
     e[p1]=2;
     e[p1]+=2;

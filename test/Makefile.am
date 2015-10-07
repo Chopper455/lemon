@@ -11,6 +11,7 @@ noinst_HEADERS += \
 
 check_PROGRAMS += \
 	test/adaptors_test \
+	test/arc_lookup_test \
 	test/bellman_ford_test \
 	test/bfs_test \
 	test/circulation_test \
@@ -23,6 +24,7 @@ check_PROGRAMS += \
 	test/edge_set_test \
 	test/error_test \
 	test/euler_test \
+	test/fractional_matching_test \
 	test/gomory_hu_test \
 	test/graph_copy_test \
 	test/graph_test \
@@ -30,6 +32,7 @@ check_PROGRAMS += \
 	test/hao_orlin_test \
 	test/heap_test \
 	test/kruskal_test \
+	test/lgf_test \
 	test/maps_test \
 	test/matching_test \
 	test/min_cost_arborescence_test \
@@ -59,6 +62,7 @@ TESTS += $(check_PROGRAMS)
 XFAIL_TESTS += test/test_tools_fail$(EXEEXT)
 
 test_adaptors_test_SOURCES = test/adaptors_test.cc
+test_adaptors_test_SOURCES = test/arc_lookup_test.cc
 test_bellman_ford_test_SOURCES = test/bellman_ford_test.cc
 test_bfs_test_SOURCES = test/bfs_test.cc
 test_circulation_test_SOURCES = test/circulation_test.cc
@@ -71,13 +75,15 @@ test_dim_test_SOURCES = test/dim_test.cc
 test_edge_set_test_SOURCES = test/edge_set_test.cc
 test_error_test_SOURCES = test/error_test.cc
 test_euler_test_SOURCES = test/euler_test.cc
+test_fractional_matching_test_SOURCES = test/fractional_matching_test.cc
 test_gomory_hu_test_SOURCES = test/gomory_hu_test.cc
 test_graph_copy_test_SOURCES = test/graph_copy_test.cc
 test_graph_test_SOURCES = test/graph_test.cc
 test_graph_utils_test_SOURCES = test/graph_utils_test.cc
+test_hao_orlin_test_SOURCES = test/hao_orlin_test.cc
 test_heap_test_SOURCES = test/heap_test.cc
 test_kruskal_test_SOURCES = test/kruskal_test.cc
-test_hao_orlin_test_SOURCES = test/hao_orlin_test.cc
+test_lgf_test_SOURCES = test/lgf_test.cc
 test_lp_test_SOURCES = test/lp_test.cc
 test_maps_test_SOURCES = test/maps_test.cc
 test_mip_test_SOURCES = test/mip_test.cc

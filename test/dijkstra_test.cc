@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -65,6 +65,8 @@ void checkDijkstraCompile()
   VType l;
   int i;
   bool b;
+  ::lemon::ignore_unused_variable_warning(l,i,b);
+
   DType::DistMap d(G);
   DType::PredMap p(G);
   LengthMap length;
@@ -85,7 +87,7 @@ void checkDijkstraCompile()
     n = const_dijkstra_test.nextNode();
     b = const_dijkstra_test.emptyQueue();
     i = const_dijkstra_test.queueSize();
-    
+
     dijkstra_test.start();
     dijkstra_test.start(t);
     dijkstra_test.start(nm);
@@ -109,7 +111,7 @@ void checkDijkstraCompile()
       ::SetOperationTraits<DijkstraDefaultOperationTraits<VType> >
       ::SetHeap<BinHeap<VType, concepts::ReadWriteMap<Node,int> > >
       ::SetStandardHeap<BinHeap<VType, concepts::ReadWriteMap<Node,int> > >
-      ::SetHeap<BinHeap<VType, concepts::ReadWriteMap<Node,int> >, 
+      ::SetHeap<BinHeap<VType, concepts::ReadWriteMap<Node,int> >,
                 concepts::ReadWriteMap<Node,int> >
       ::Create dijkstra_test(G,length);
 
@@ -119,7 +121,7 @@ void checkDijkstraCompile()
     concepts::WriteMap<Node,bool> processed_map;
     concepts::ReadWriteMap<Node,int> heap_cross_ref;
     BinHeap<VType, concepts::ReadWriteMap<Node,int> > heap(heap_cross_ref);
-    
+
     dijkstra_test
       .lengthMap(length_map)
       .predMap(pred_map)
@@ -136,7 +138,7 @@ void checkDijkstraCompile()
     n = dijkstra_test.nextNode();
     b = dijkstra_test.emptyQueue();
     i = dijkstra_test.queueSize();
-    
+
     dijkstra_test.start();
     dijkstra_test.start(t);
     dijkstra_test.start(nm);
@@ -162,6 +164,8 @@ void checkDijkstraFunctionCompile()
 
   Digraph g;
   bool b;
+  ::lemon::ignore_unused_variable_warning(b);
+
   dijkstra(g,LengthMap()).run(Node());
   b=dijkstra(g,LengthMap()).run(Node(),Node());
   dijkstra(g,LengthMap())

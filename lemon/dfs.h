@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -82,7 +82,8 @@ namespace lemon {
     ///The type of the map that indicates which nodes are reached.
 
     ///The type of the map that indicates which nodes are reached.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
     ///Instantiates a \c ReachedMap.
 
@@ -121,6 +122,11 @@ namespace lemon {
   ///
   ///\tparam GR The type of the digraph the algorithm runs on.
   ///The default type is \ref ListDigraph.
+  ///\tparam TR The traits class that defines various types used by the
+  ///algorithm. By default, it is \ref DfsDefaultTraits
+  ///"DfsDefaultTraits<GR>".
+  ///In most cases, this parameter should not be set directly,
+  ///consider to use the named template parameters instead.
 #ifdef DOXYGEN
   template <typename GR,
             typename TR>
@@ -265,7 +271,8 @@ namespace lemon {
     ///
     ///\ref named-templ-param "Named parameter" for setting
     ///\c ReachedMap type.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     template <class T>
     struct SetReachedMap : public Dfs< Digraph, SetReachedMapTraits<T> > {
       typedef Dfs< Digraph, SetReachedMapTraits<T> > Create;
@@ -558,7 +565,7 @@ namespace lemon {
     ///added with addSource() before using this function.
     void start(Node t)
     {
-      while ( !emptyQueue() && G->target(_stack[_stack_head])!=t )
+      while ( !emptyQueue() && !(*_reached)[t] )
         processNextArc();
     }
 
@@ -797,7 +804,8 @@ namespace lemon {
     ///The type of the map that indicates which nodes are reached.
 
     ///The type of the map that indicates which nodes are reached.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
     ///Instantiates a ReachedMap.
 
@@ -887,6 +895,9 @@ namespace lemon {
   ///
   /// This class should only be used through the \ref dfs() function,
   /// which makes it easier to use the algorithm.
+  ///
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm.
   template<class TR>
   class DfsWizard : public TR
   {
@@ -1182,6 +1193,7 @@ namespace lemon {
         visitor.backtrack(arc);
       }
       _Visitor& visitor;
+      Constraints() {}
     };
   };
 #endif
@@ -1199,7 +1211,8 @@ namespace lemon {
     /// \brief The type of the map that indicates which nodes are reached.
     ///
     /// The type of the map that indicates which nodes are reached.
-    /// It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    /// It must conform to the
+    /// \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
 
     /// \brief Instantiates a ReachedMap.
@@ -1237,11 +1250,11 @@ namespace lemon {
   /// \ref DfsVisitor "DfsVisitor<GR>" is an empty visitor, which
   /// does not observe the DFS events. If you want to observe the DFS
   /// events, you should implement your own visitor class.
-  /// \tparam TR Traits class to set various data types used by the
-  /// algorithm. The default traits class is
-  /// \ref DfsVisitDefaultTraits "DfsVisitDefaultTraits<GR>".
-  /// See \ref DfsVisitDefaultTraits for the documentation of
-  /// a DFS visit traits class.
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm. By default, it is \ref DfsVisitDefaultTraits
+  /// "DfsVisitDefaultTraits<GR>".
+  /// In most cases, this parameter should not be set directly,
+  /// consider to use the named template parameters instead.
 #ifdef DOXYGEN
   template <typename GR, typename VS, typename TR>
 #else
@@ -1500,7 +1513,7 @@ namespace lemon {
     /// \pre init() must be called and a root node should be added
     /// with addSource() before using this function.
     void start(Node t) {
-      while ( !emptyQueue() && _digraph->target(_stack[_stack_head]) != t )
+      while ( !emptyQueue() && !(*_reached)[t] )
         processNextArc();
     }
 

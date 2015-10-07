@@ -8,6 +8,12 @@ CONFIGURE_FILE(
   ${CMAKE_CURRENT_BINARY_DIR}/config.h
 )
 
+CONFIGURE_FILE(
+  ${CMAKE_CURRENT_SOURCE_DIR}/lemon.pc.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/lemon.pc
+  @ONLY
+)
+
 SET(LEMON_SOURCES
   arg_parser.cc
   base.cc
@@ -51,6 +57,7 @@ ENDIF()
 INSTALL(
   TARGETS lemon
   ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
   COMPONENT library
 )
 
@@ -66,3 +73,9 @@ INSTALL(
   DESTINATION include/lemon
   COMPONENT headers
 )
+
+INSTALL(
+  FILES ${CMAKE_CURRENT_BINARY_DIR}/lemon.pc
+  DESTINATION lib/pkgconfig
+)
+

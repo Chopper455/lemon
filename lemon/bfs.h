@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -82,7 +82,8 @@ namespace lemon {
     ///The type of the map that indicates which nodes are reached.
 
     ///The type of the map that indicates which nodes are reached.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
     ///Instantiates a \c ReachedMap.
 
@@ -121,6 +122,11 @@ namespace lemon {
   ///
   ///\tparam GR The type of the digraph the algorithm runs on.
   ///The default type is \ref ListDigraph.
+  ///\tparam TR The traits class that defines various types used by the
+  ///algorithm. By default, it is \ref BfsDefaultTraits
+  ///"BfsDefaultTraits<GR>".
+  ///In most cases, this parameter should not be set directly,
+  ///consider to use the named template parameters instead.
 #ifdef DOXYGEN
   template <typename GR,
             typename TR>
@@ -266,7 +272,8 @@ namespace lemon {
     ///
     ///\ref named-templ-param "Named parameter" for setting
     ///\c ReachedMap type.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     template <class T>
     struct SetReachedMap : public Bfs< Digraph, SetReachedMapTraits<T> > {
       typedef Bfs< Digraph, SetReachedMapTraits<T> > Create;
@@ -867,7 +874,8 @@ namespace lemon {
     ///The type of the map that indicates which nodes are reached.
 
     ///The type of the map that indicates which nodes are reached.
-    ///It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    ///It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
     ///Instantiates a ReachedMap.
 
@@ -957,6 +965,9 @@ namespace lemon {
   ///
   /// This class should only be used through the \ref bfs() function,
   /// which makes it easier to use the algorithm.
+  ///
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm.
   template<class TR>
   class BfsWizard : public TR
   {
@@ -1240,6 +1251,7 @@ namespace lemon {
         visitor.examine(arc);
       }
       _Visitor& visitor;
+      Constraints() {}
     };
   };
 #endif
@@ -1257,7 +1269,8 @@ namespace lemon {
     /// \brief The type of the map that indicates which nodes are reached.
     ///
     /// The type of the map that indicates which nodes are reached.
-    /// It must conform to the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
+    /// It must conform to
+    ///the \ref concepts::ReadWriteMap "ReadWriteMap" concept.
     typedef typename Digraph::template NodeMap<bool> ReachedMap;
 
     /// \brief Instantiates a ReachedMap.
@@ -1295,11 +1308,11 @@ namespace lemon {
   /// \ref BfsVisitor "BfsVisitor<GR>" is an empty visitor, which
   /// does not observe the BFS events. If you want to observe the BFS
   /// events, you should implement your own visitor class.
-  /// \tparam TR Traits class to set various data types used by the
-  /// algorithm. The default traits class is
-  /// \ref BfsVisitDefaultTraits "BfsVisitDefaultTraits<GR>".
-  /// See \ref BfsVisitDefaultTraits for the documentation of
-  /// a BFS visit traits class.
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm. By default, it is \ref BfsVisitDefaultTraits
+  /// "BfsVisitDefaultTraits<GR>".
+  /// In most cases, this parameter should not be set directly,
+  /// consider to use the named template parameters instead.
 #ifdef DOXYGEN
   template <typename GR, typename VS, typename TR>
 #else

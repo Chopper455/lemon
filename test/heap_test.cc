@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -30,12 +30,12 @@
 #include <lemon/maps.h>
 
 #include <lemon/bin_heap.h>
-#include <lemon/fourary_heap.h>
-#include <lemon/kary_heap.h>
+#include <lemon/quad_heap.h>
+#include <lemon/dheap.h>
 #include <lemon/fib_heap.h>
 #include <lemon/pairing_heap.h>
 #include <lemon/radix_heap.h>
-#include <lemon/binom_heap.h>
+#include <lemon/binomial_heap.h>
 #include <lemon/bucket_heap.h>
 
 #include "test_tools.h"
@@ -185,26 +185,26 @@ int main() {
     dijkstraHeapTest<NodeHeap>(digraph, length, source);
   }
 
-  // FouraryHeap
+  // QuadHeap
   {
-    typedef FouraryHeap<Prio, ItemIntMap> IntHeap;
+    typedef QuadHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
     heapIncreaseTest<IntHeap>();
 
-    typedef FouraryHeap<Prio, IntNodeMap > NodeHeap;
+    typedef QuadHeap<Prio, IntNodeMap > NodeHeap;
     checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
     dijkstraHeapTest<NodeHeap>(digraph, length, source);
   }
 
-  // KaryHeap
+  // DHeap
   {
-    typedef KaryHeap<Prio, ItemIntMap> IntHeap;
+    typedef DHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
     heapIncreaseTest<IntHeap>();
 
-    typedef KaryHeap<Prio, IntNodeMap > NodeHeap;
+    typedef DHeap<Prio, IntNodeMap > NodeHeap;
     checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
     dijkstraHeapTest<NodeHeap>(digraph, length, source);
   }
@@ -245,14 +245,14 @@ int main() {
     dijkstraHeapTest<NodeHeap>(digraph, length, source);
   }
 
-  // BinomHeap
+  // BinomialHeap
   {
-    typedef BinomHeap<Prio, ItemIntMap> IntHeap;
+    typedef BinomialHeap<Prio, ItemIntMap> IntHeap;
     checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
     heapSortTest<IntHeap>();
     heapIncreaseTest<IntHeap>();
 
-    typedef BinomHeap<Prio, IntNodeMap > NodeHeap;
+    typedef BinomialHeap<Prio, IntNodeMap > NodeHeap;
     checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
     dijkstraHeapTest<NodeHeap>(digraph, length, source);
   }
@@ -271,6 +271,40 @@ int main() {
     typedef SimpleBucketHeap<ItemIntMap> SimpleIntHeap;
     heapSortTest<SimpleIntHeap>();
   }
+
+  {
+    typedef FibHeap<Prio, ItemIntMap> IntHeap;
+    checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
+    heapSortTest<IntHeap>();
+    heapIncreaseTest<IntHeap>();
+
+    typedef FibHeap<Prio, IntNodeMap > NodeHeap;
+    checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
+    dijkstraHeapTest<NodeHeap>(digraph, length, source);
+  }
+
+  {
+    typedef RadixHeap<ItemIntMap> IntHeap;
+    checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
+    heapSortTest<IntHeap>();
+    heapIncreaseTest<IntHeap>();
+
+    typedef RadixHeap<IntNodeMap > NodeHeap;
+    checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
+    dijkstraHeapTest<NodeHeap>(digraph, length, source);
+  }
+
+  {
+    typedef BucketHeap<ItemIntMap> IntHeap;
+    checkConcept<Heap<Prio, ItemIntMap>, IntHeap>();
+    heapSortTest<IntHeap>();
+    heapIncreaseTest<IntHeap>();
+
+    typedef BucketHeap<IntNodeMap > NodeHeap;
+    checkConcept<Heap<Prio, IntNodeMap >, NodeHeap>();
+    dijkstraHeapTest<NodeHeap>(digraph, length, source);
+  }
+
 
   return 0;
 }

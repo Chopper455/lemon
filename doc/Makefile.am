@@ -11,6 +11,8 @@ EXTRA_DIST += \
 	doc/min_cost_flow.dox \
 	doc/named-param.dox \
 	doc/namespaces.dox \
+	doc/references.bib \
+	doc/template.h \
 	doc/html \
 	doc/CMakeLists.txt
 
@@ -27,7 +29,9 @@ DOC_EPS_IMAGES27 = \
 	bipartite_partitions.eps \
 	connected_components.eps \
 	edge_biconnected_components.eps \
+	matching.eps \
 	node_biconnected_components.eps \
+	planar.eps \
 	strongly_connected_components.eps
 
 DOC_EPS_IMAGES = \

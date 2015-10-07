@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -38,7 +38,7 @@ namespace lemon {
     ///
     /// \note This class is a template class so that we can use it to
     /// create graph skeleton classes. The reason for this is that \c Node
-    /// and \c Arc (or \c Edge) types should \e not derive from the same 
+    /// and \c Arc (or \c Edge) types should \e not derive from the same
     /// base class. For \c Node you should instantiate it with character
     /// \c 'n', for \c Arc with \c 'a' and for \c Edge with \c 'e'.
 #ifndef DOXYGEN
@@ -89,7 +89,7 @@ namespace lemon {
       /// \brief Ordering operator.
       ///
       /// This operator defines an ordering of the items.
-      /// It makes possible to use graph item types as key types in 
+      /// It makes possible to use graph item types as key types in
       /// associative containers (e.g. \c std::map).
       ///
       /// \note This operator only has to define some strict ordering of
@@ -108,6 +108,8 @@ namespace lemon {
           i1 = i2 = i3;
 
           bool b;
+          ::lemon::ignore_unused_variable_warning(b);
+
           b = (ia == ib) && (ia != ib);
           b = (ia == INVALID) && (ib != INVALID);
           b = (ia < ib);
@@ -115,6 +117,7 @@ namespace lemon {
 
         const _GraphItem &ia;
         const _GraphItem &ib;
+        Constraints() {}
       };
     };
 
@@ -122,7 +125,7 @@ namespace lemon {
     ///
     /// This class describes the base interface of directed graph types.
     /// All digraph %concepts have to conform to this class.
-    /// It just provides types for nodes and arcs and functions 
+    /// It just provides types for nodes and arcs and functions
     /// to get the source and the target nodes of arcs.
     class BaseDigraphComponent {
     public:
@@ -174,6 +177,7 @@ namespace lemon {
         }
 
         const _Digraph& digraph;
+        Constraints() {}
       };
     };
 
@@ -285,11 +289,12 @@ namespace lemon {
             e = graph.oppositeArc(e);
             ue = e;
             bool d = graph.direction(e);
-            ignore_unused_variable_warning(d);
+            ::lemon::ignore_unused_variable_warning(d);
           }
         }
 
         const _Graph& graph;
+      Constraints() {}
       };
 
     };
@@ -363,12 +368,13 @@ namespace lemon {
           arc = digraph.arcFromId(eid);
 
           nid = digraph.maxNodeId();
-          ignore_unused_variable_warning(nid);
+          ::lemon::ignore_unused_variable_warning(nid);
           eid = digraph.maxArcId();
-          ignore_unused_variable_warning(eid);
+          ::lemon::ignore_unused_variable_warning(eid);
         }
 
         const _Digraph& digraph;
+        Constraints() {}
       };
     };
 
@@ -417,16 +423,17 @@ namespace lemon {
           ueid = graph.id(edge);
           edge = graph.edgeFromId(ueid);
           ueid = graph.maxEdgeId();
-          ignore_unused_variable_warning(ueid);
+          ::lemon::ignore_unused_variable_warning(ueid);
         }
 
         const _Graph& graph;
+        Constraints() {}
       };
     };
 
     /// \brief Concept class for \c NodeIt, \c ArcIt and \c EdgeIt types.
     ///
-    /// This class describes the concept of \c NodeIt, \c ArcIt and 
+    /// This class describes the concept of \c NodeIt, \c ArcIt and
     /// \c EdgeIt subtypes of digraph and graph types.
     template <typename GR, typename Item>
     class GraphItemIt : public Item {
@@ -466,7 +473,7 @@ namespace lemon {
       /// This operator increments the iterator, i.e. assigns it to the
       /// next item.
       GraphItemIt& operator++() { return *this; }
- 
+
       /// \brief Equality operator
       ///
       /// Equality operator.
@@ -489,6 +496,8 @@ namespace lemon {
           _GraphItemIt it2;
           _GraphItemIt it3 = it1;
           _GraphItemIt it4 = INVALID;
+          ::lemon::ignore_unused_variable_warning(it3);
+          ::lemon::ignore_unused_variable_warning(it4);
 
           it2 = ++it1;
           ++it2 = it1;
@@ -498,18 +507,19 @@ namespace lemon {
           bi = it2;
         }
         const GR& g;
+        Constraints() {}
       };
     };
 
-    /// \brief Concept class for \c InArcIt, \c OutArcIt and 
+    /// \brief Concept class for \c InArcIt, \c OutArcIt and
     /// \c IncEdgeIt types.
     ///
-    /// This class describes the concept of \c InArcIt, \c OutArcIt 
+    /// This class describes the concept of \c InArcIt, \c OutArcIt
     /// and \c IncEdgeIt subtypes of digraph and graph types.
     ///
     /// \note Since these iterator classes do not inherit from the same
     /// base class, there is an additional template parameter (selector)
-    /// \c sel. For \c InArcIt you should instantiate it with character 
+    /// \c sel. For \c InArcIt you should instantiate it with character
     /// \c 'i', for \c OutArcIt with \c 'o' and for \c IncEdgeIt with \c 'e'.
     template <typename GR,
               typename Item = typename GR::Arc,
@@ -530,10 +540,10 @@ namespace lemon {
       /// Copy constructor.
       GraphIncIt(const GraphIncIt& it) : Item(it) {}
 
-      /// \brief Constructor that sets the iterator to the first 
+      /// \brief Constructor that sets the iterator to the first
       /// incoming or outgoing arc.
       ///
-      /// Constructor that sets the iterator to the first arc 
+      /// Constructor that sets the iterator to the first arc
       /// incoming to or outgoing from the given node.
       explicit GraphIncIt(const GR&, const Base&) {}
 
@@ -577,6 +587,8 @@ namespace lemon {
           _GraphIncIt it2;
           _GraphIncIt it3 = it1;
           _GraphIncIt it4 = INVALID;
+          ::lemon::ignore_unused_variable_warning(it3);
+          ::lemon::ignore_unused_variable_warning(it4);
 
           it2 = ++it1;
           ++it2 = it1;
@@ -586,6 +598,7 @@ namespace lemon {
         }
         const Base& node;
         const GR& graph;
+        Constraints() {}
       };
     };
 
@@ -757,11 +770,12 @@ namespace lemon {
             n = digraph.runningNode(iait);
             n = digraph.baseNode(oait);
             n = digraph.runningNode(oait);
-            ignore_unused_variable_warning(n);
+            ::lemon::ignore_unused_variable_warning(n);
           }
         }
 
         const _Digraph& digraph;
+        Constraints() {}
       };
     };
 
@@ -804,16 +818,16 @@ namespace lemon {
 
       /// \brief Return the first edge incident to the given node.
       ///
-      /// This function gives back the first edge incident to the given 
+      /// This function gives back the first edge incident to the given
       /// node. The bool parameter gives back the direction for which the
-      /// source node of the directed arc representing the edge is the 
+      /// source node of the directed arc representing the edge is the
       /// given node.
       void firstInc(Edge&, bool&, const Node&) const {}
 
       /// \brief Gives back the next of the edges from the
       /// given node.
       ///
-      /// This function gives back the next edge incident to the given 
+      /// This function gives back the next edge incident to the given
       /// node. The bool parameter should be used as \c firstInc() use it.
       void nextInc(Edge&, bool&) const {}
 
@@ -886,6 +900,7 @@ namespace lemon {
         }
 
         const _Graph& graph;
+        Constraints() {}
       };
     };
 
@@ -938,11 +953,12 @@ namespace lemon {
           typename _Digraph::ArcNotifier& en
             = digraph.notifier(typename _Digraph::Arc());
 
-          ignore_unused_variable_warning(nn);
-          ignore_unused_variable_warning(en);
+          ::lemon::ignore_unused_variable_warning(nn);
+          ::lemon::ignore_unused_variable_warning(en);
         }
 
         const _Digraph& digraph;
+        Constraints() {}
       };
     };
 
@@ -980,17 +996,18 @@ namespace lemon {
           checkConcept<AlterableDigraphComponent<Base>, _Graph>();
           typename _Graph::EdgeNotifier& uen
             = graph.notifier(typename _Graph::Edge());
-          ignore_unused_variable_warning(uen);
+          ::lemon::ignore_unused_variable_warning(uen);
         }
 
         const _Graph& graph;
+        Constraints() {}
       };
     };
 
     /// \brief Concept class for standard graph maps.
     ///
     /// This class describes the concept of standard graph maps, i.e.
-    /// the \c NodeMap, \c ArcMap and \c EdgeMap subtypes of digraph and 
+    /// the \c NodeMap, \c ArcMap and \c EdgeMap subtypes of digraph and
     /// graph types, which can be used for associating data to graph items.
     /// The standard graph maps must conform to the ReferenceMap concept.
     template <typename GR, typename K, typename V>
@@ -1045,7 +1062,7 @@ namespace lemon {
             <ReferenceMap<Key, Value, Value&, const Value&>, _Map>();
           _Map m1(g);
           _Map m2(g,t);
-          
+
           // Copy constructor
           // _Map m3(m);
 
@@ -1053,14 +1070,15 @@ namespace lemon {
           // ReadMap<Key, Value> cmap;
           // m3 = cmap;
 
-          ignore_unused_variable_warning(m1);
-          ignore_unused_variable_warning(m2);
-          // ignore_unused_variable_warning(m3);
+          ::lemon::ignore_unused_variable_warning(m1);
+          ::lemon::ignore_unused_variable_warning(m2);
+          // ::lemon::ignore_unused_variable_warning(m3);
         }
 
         const _Map &m;
         const GR &g;
         const typename GraphMap::Value &t;
+        Constraints() {}
       };
 
     };
@@ -1068,7 +1086,7 @@ namespace lemon {
     /// \brief Skeleton class for mappable directed graphs.
     ///
     /// This class describes the interface of mappable directed graphs.
-    /// It extends \ref BaseDigraphComponent with the standard digraph 
+    /// It extends \ref BaseDigraphComponent with the standard digraph
     /// map classes, namely \c NodeMap and \c ArcMap.
     /// This concept is part of the Digraph concept.
     template <typename BAS = BaseDigraphComponent>
@@ -1199,13 +1217,14 @@ namespace lemon {
         }
 
         const _Digraph& digraph;
+        Constraints() {}
       };
     };
 
     /// \brief Skeleton class for mappable undirected graphs.
     ///
     /// This class describes the interface of mappable undirected graphs.
-    /// It extends \ref MappableDigraphComponent with the standard graph 
+    /// It extends \ref MappableDigraphComponent with the standard graph
     /// map class for edges (\c EdgeMap).
     /// This concept is part of the Graph concept.
     template <typename BAS = BaseGraphComponent>
@@ -1284,13 +1303,14 @@ namespace lemon {
         }
 
         const _Graph& graph;
+        Constraints() {}
       };
     };
 
     /// \brief Skeleton class for extendable directed graphs.
     ///
     /// This class describes the interface of extendable directed graphs.
-    /// It extends \ref BaseDigraphComponent with functions for adding 
+    /// It extends \ref BaseDigraphComponent with functions for adding
     /// nodes and arcs to the digraph.
     /// This concept requires \ref AlterableDigraphComponent.
     template <typename BAS = BaseDigraphComponent>
@@ -1328,13 +1348,14 @@ namespace lemon {
         }
 
         _Digraph& digraph;
+        Constraints() {}
       };
     };
 
     /// \brief Skeleton class for extendable undirected graphs.
     ///
     /// This class describes the interface of extendable undirected graphs.
-    /// It extends \ref BaseGraphComponent with functions for adding 
+    /// It extends \ref BaseGraphComponent with functions for adding
     /// nodes and edges to the graph.
     /// This concept requires \ref AlterableGraphComponent.
     template <typename BAS = BaseGraphComponent>
@@ -1372,13 +1393,14 @@ namespace lemon {
         }
 
         _Graph& graph;
+        Constraints() {}
       };
     };
 
     /// \brief Skeleton class for erasable directed graphs.
     ///
     /// This class describes the interface of erasable directed graphs.
-    /// It extends \ref BaseDigraphComponent with functions for removing 
+    /// It extends \ref BaseDigraphComponent with functions for removing
     /// nodes and arcs from the digraph.
     /// This concept requires \ref AlterableDigraphComponent.
     template <typename BAS = BaseDigraphComponent>
@@ -1391,7 +1413,7 @@ namespace lemon {
 
       /// \brief Erase a node from the digraph.
       ///
-      /// This function erases the given node from the digraph and all arcs 
+      /// This function erases the given node from the digraph and all arcs
       /// connected to the node.
       void erase(const Node&) {}
 
@@ -1411,13 +1433,14 @@ namespace lemon {
         }
 
         _Digraph& digraph;
+        Constraints() {}
       };
     };
 
     /// \brief Skeleton class for erasable undirected graphs.
     ///
     /// This class describes the interface of erasable undirected graphs.
-    /// It extends \ref BaseGraphComponent with functions for removing 
+    /// It extends \ref BaseGraphComponent with functions for removing
     /// nodes and edges from the graph.
     /// This concept requires \ref AlterableGraphComponent.
     template <typename BAS = BaseGraphComponent>
@@ -1450,6 +1473,7 @@ namespace lemon {
         }
 
         _Graph& graph;
+        Constraints() {}
       };
     };
 
@@ -1478,6 +1502,7 @@ namespace lemon {
         }
 
         _Digraph& digraph;
+        Constraints() {}
       };
     };
 
@@ -1506,6 +1531,7 @@ namespace lemon {
         }
 
         _Graph& graph;
+        Constraints() {}
       };
     };
 

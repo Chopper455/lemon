@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -88,10 +88,10 @@ void solve_max(ArgParser &ap, std::istream &is, std::ostream &,
   ti.restart();
   pre.run();
   if(report) std::cerr << "Run Preflow: " << ti << '\n';
-  if(report) std::cerr << "\nMax flow value: " << pre.flowValue() << '\n';  
+  if(report) std::cerr << "\nMax flow value: " << pre.flowValue() << '\n';
 }
 
-template<class Value>
+template<class Value, class LargeValue>
 void solve_min(ArgParser &ap, std::istream &is, std::ostream &,
                Value infty, DimacsDescriptor &desc)
 {
@@ -117,17 +117,19 @@ void solve_min(ArgParser &ap, std::istream &is, std::ostream &,
   }
   if (report) std::cerr << "Read the file: " << ti << '\n';
 
+  typedef NetworkSimplex<Digraph, Value> MCF;
   ti.restart();
-  NetworkSimplex<Digraph, Value> ns(g);
+  MCF ns(g);
   ns.lowerMap(lower).upperMap(cap).costMap(cost).supplyMap(sup);
   if (sum_sup > 0) ns.supplyType(ns.LEQ);
   if (report) std::cerr << "Setup NetworkSimplex class: " << ti << '\n';
   ti.restart();
-  bool res = ns.run();
+  typename MCF::ProblemType res = ns.run();
   if (report) {
     std::cerr << "Run NetworkSimplex: " << ti << "\n\n";
-    std::cerr << "Feasible flow: " << (res ? "found" : "not found") << '\n';
-    if (res) std::cerr << "Min flow cost: " << ns.totalCost() << '\n';
+    std::cerr << "Feasible flow: " << (res == MCF::OPTIMAL ? "found" : "not found") << '\n';
+    if (res) std::cerr << "Min flow cost: "
+                       << ns.template totalCost<LargeValue>() << '\n';
   }
 }
 
@@ -147,11 +149,11 @@ void solve_mat(ArgParser &ap, std::istream &is, std::ostream &,
   mat.run();
   if(report) std::cerr << "Run MaxMatching: " << ti << '\n';
   if(report) std::cerr << "\nCardinality of max matching: "
-                       << mat.matchingSize() << '\n';  
+                       << mat.matchingSize() << '\n';
 }
 
 
-template<class Value>
+template<class Value, class LargeValue>
 void solve(ArgParser &ap, std::istream &is, std::ostream &os,
            DimacsDescriptor &desc)
 {
@@ -165,11 +167,11 @@ void solve(ArgParser &ap, std::istream &is, std::ostream &os,
                 << std::endl;
       exit(1);
     }
-  
+
   switch(desc.type)
     {
     case DimacsDescriptor::MIN:
-      solve_min<Value>(ap,is,os,infty,desc);
+      solve_min<Value, LargeValue>(ap,is,os,infty,desc);
       break;
     case DimacsDescriptor::MAX:
       solve_max<Value>(ap,is,os,infty,desc);
@@ -186,9 +188,6 @@ void solve(ArgParser &ap, std::istream &is, std::ostream &os,
 }
 
 int main(int argc, const char *argv[]) {
-  typedef SmartDigraph Digraph;
-
-  typedef Digraph::Arc Arc;
 
   std::string inputName;
   std::string outputName;
@@ -237,7 +236,7 @@ int main(int argc, const char *argv[]) {
   std::ostream& os = (ap.files().size()<2 ? std::cout : output);
 
   DimacsDescriptor desc = dimacsType(is);
-  
+
   if(!ap.given("q"))
     {
       std::cout << "Problem type: ";
@@ -262,16 +261,18 @@ int main(int argc, const char *argv[]) {
       std::cout << "\nNum of arcs:  " << desc.edgeNum;
       std::cout << "\n\n";
     }
-    
+
   if(ap.given("double"))
-    solve<double>(ap,is,os,desc);
+    solve<double, double>(ap,is,os,desc);
   else if(ap.given("ldouble"))
-    solve<long double>(ap,is,os,desc);
+    solve<long double, long double>(ap,is,os,desc);
 #ifdef LEMON_HAVE_LONG_LONG
   else if(ap.given("long"))
-    solve<long long>(ap,is,os,desc);
+    solve<long long, long long>(ap,is,os,desc);
+  else solve<int, long long>(ap,is,os,desc);
+#else
+  else solve<int, long>(ap,is,os,desc);
 #endif
-  else solve<int>(ap,is,os,desc);
 
   return 0;
 }

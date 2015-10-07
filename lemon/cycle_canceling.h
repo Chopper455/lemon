@@ -1,8 +1,8 @@
-/* -*- C++ -*-
+/* -*- mode: C++; indent-tabs-mode: nil; -*-
  *
- * This file is a part of LEMON, a generic C++ optimization library
+ * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -34,7 +34,7 @@
 #include <lemon/adaptors.h>
 #include <lemon/circulation.h>
 #include <lemon/bellman_ford.h>
-#include <lemon/howard.h>
+#include <lemon/howard_mmc.h>
 
 namespace lemon {
 
@@ -142,23 +142,24 @@ namespace lemon {
   private:
 
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
-    
+
     typedef std::vector<int> IntVector;
-    typedef std::vector<char> CharVector;
     typedef std::vector<double> DoubleVector;
     typedef std::vector<Value> ValueVector;
     typedef std::vector<Cost> CostVector;
+    typedef std::vector<char> BoolVector;
+    // Note: vector<char> is used instead of vector<bool> for efficiency reasons
 
   private:
-  
+
     template <typename KT, typename VT>
     class StaticVectorMap {
     public:
       typedef KT Key;
       typedef VT Value;
-      
+
       StaticVectorMap(std::vector<Value>& v) : _v(v) {}
-      
+
       const Value& operator[](const Key& key) const {
         return _v[StaticDigraph::id(key)];
       }
@@ -166,7 +167,7 @@ namespace lemon {
       Value& operator[](const Key& key) {
         return _v[StaticDigraph::id(key)];
       }
-      
+
       void set(const Key& key, const Value& val) {
         _v[StaticDigraph::id(key)] = val;
       }
@@ -198,7 +199,7 @@ namespace lemon {
     IntArcMap _arc_idf;
     IntArcMap _arc_idb;
     IntVector _first_out;
-    CharVector _forward;
+    BoolVector _forward;
     IntVector _source;
     IntVector _target;
     IntVector _reverse;
@@ -220,9 +221,9 @@ namespace lemon {
     IntVector _id_vec;
     CostArcMap _cost_map;
     CostNodeMap _pi_map;
-  
+
   public:
-  
+
     /// \brief Constant for infinite upper bounds (capacities).
     ///
     /// Constant for infinite upper bounds (capacities).
@@ -250,71 +251,7 @@ namespace lemon {
       LEMON_ASSERT(std::numeric_limits<Cost>::is_signed,
         "The cost type of CycleCanceling must be signed");
 
-      // Resize vectors
-      _node_num = countNodes(_graph);
-      _arc_num = countArcs(_graph);
-      _res_node_num = _node_num + 1;
-      _res_arc_num = 2 * (_arc_num + _node_num);
-      _root = _node_num;
-
-      _first_out.resize(_res_node_num + 1);
-      _forward.resize(_res_arc_num);
-      _source.resize(_res_arc_num);
-      _target.resize(_res_arc_num);
-      _reverse.resize(_res_arc_num);
-
-      _lower.resize(_res_arc_num);
-      _upper.resize(_res_arc_num);
-      _cost.resize(_res_arc_num);
-      _supply.resize(_res_node_num);
-      
-      _res_cap.resize(_res_arc_num);
-      _pi.resize(_res_node_num);
-
-      _arc_vec.reserve(_res_arc_num);
-      _cost_vec.reserve(_res_arc_num);
-      _id_vec.reserve(_res_arc_num);
-
-      // Copy the graph
-      int i = 0, j = 0, k = 2 * _arc_num + _node_num;
-      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
-        _node_id[n] = i;
-      }
-      i = 0;
-      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
-        _first_out[i] = j;
-        for (OutArcIt a(_graph, n); a != INVALID; ++a, ++j) {
-          _arc_idf[a] = j;
-          _forward[j] = true;
-          _source[j] = i;
-          _target[j] = _node_id[_graph.runningNode(a)];
-        }
-        for (InArcIt a(_graph, n); a != INVALID; ++a, ++j) {
-          _arc_idb[a] = j;
-          _forward[j] = false;
-          _source[j] = i;
-          _target[j] = _node_id[_graph.runningNode(a)];
-        }
-        _forward[j] = false;
-        _source[j] = i;
-        _target[j] = _root;
-        _reverse[j] = k;
-        _forward[k] = true;
-        _source[k] = _root;
-        _target[k] = i;
-        _reverse[k] = j;
-        ++j; ++k;
-      }
-      _first_out[i] = j;
-      _first_out[_res_node_num] = k;
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        int fi = _arc_idf[a];
-        int bi = _arc_idb[a];
-        _reverse[fi] = bi;
-        _reverse[bi] = fi;
-      }
-      
-      // Reset parameters
+      // Reset data structures
       reset();
     }
 
@@ -429,7 +366,7 @@ namespace lemon {
       _supply[_node_id[t]] = -k;
       return *this;
     }
-    
+
     /// @}
 
     /// \name Execution control
@@ -449,12 +386,12 @@ namespace lemon {
     ///     .supplyMap(sup).run();
     /// \endcode
     ///
-    /// This function can be called more than once. All the parameters
-    /// that have been given are kept for the next call, unless
-    /// \ref reset() is called, thus only the modified parameters
-    /// have to be set again. See \ref reset() for examples.
-    /// However, the underlying digraph must not be modified after this
-    /// class have been constructed, since it copies and extends the graph.
+    /// This function can be called more than once. All the given parameters
+    /// are kept for the next call, unless \ref resetParams() or \ref reset()
+    /// is used, thus only the modified parameters have to be set again.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class (or the last \ref reset() call), then the \ref reset()
+    /// function must be called.
     ///
     /// \param method The cycle-canceling method that will be used.
     /// For more information, see \ref Method.
@@ -470,6 +407,7 @@ namespace lemon {
     /// these cases.
     ///
     /// \see ProblemType, Method
+    /// \see resetParams(), reset()
     ProblemType run(Method method = CANCEL_AND_TIGHTEN) {
       ProblemType pt = init();
       if (pt != OPTIMAL) return pt;
@@ -483,11 +421,12 @@ namespace lemon {
     /// before using functions \ref lowerMap(), \ref upperMap(),
     /// \ref costMap(), \ref supplyMap(), \ref stSupply().
     ///
-    /// It is useful for multiple run() calls. If this function is not
-    /// used, all the parameters given before are kept for the next
-    /// \ref run() call.
-    /// However, the underlying digraph must not be modified after this
-    /// class have been constructed, since it copies and extends the graph.
+    /// It is useful for multiple \ref run() calls. Basically, all the given
+    /// parameters are kept for the next \ref run() call, unless
+    /// \ref resetParams() or \ref reset() is used.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class or the last \ref reset() call, then the \ref reset()
+    /// function must be used, otherwise \ref resetParams() is sufficient.
     ///
     /// For example,
     /// \code
@@ -497,20 +436,22 @@ namespace lemon {
     ///   cc.lowerMap(lower).upperMap(upper).costMap(cost)
     ///     .supplyMap(sup).run();
     ///
-    ///   // Run again with modified cost map (reset() is not called,
+    ///   // Run again with modified cost map (resetParams() is not called,
     ///   // so only the cost map have to be set again)
     ///   cost[e] += 100;
     ///   cc.costMap(cost).run();
     ///
-    ///   // Run again from scratch using reset()
+    ///   // Run again from scratch using resetParams()
     ///   // (the lower bounds will be set to zero on all arcs)
-    ///   cc.reset();
+    ///   cc.resetParams();
     ///   cc.upperMap(capacity).costMap(cost)
     ///     .supplyMap(sup).run();
     /// \endcode
     ///
     /// \return <tt>(*this)</tt>
-    CycleCanceling& reset() {
+    ///
+    /// \see reset(), run()
+    CycleCanceling& resetParams() {
       for (int i = 0; i != _res_node_num; ++i) {
         _supply[i] = 0;
       }
@@ -525,8 +466,97 @@ namespace lemon {
         _upper[j] = INF;
         _cost[j] = 0;
         _cost[_reverse[j]] = 0;
-      }      
+      }
       _have_lower = false;
+      return *this;
+    }
+
+    /// \brief Reset the internal data structures and all the parameters
+    /// that have been given before.
+    ///
+    /// This function resets the internal data structures and all the
+    /// paramaters that have been given before using functions \ref lowerMap(),
+    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply().
+    ///
+    /// It is useful for multiple \ref run() calls. Basically, all the given
+    /// parameters are kept for the next \ref run() call, unless
+    /// \ref resetParams() or \ref reset() is used.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class or the last \ref reset() call, then the \ref reset()
+    /// function must be used, otherwise \ref resetParams() is sufficient.
+    ///
+    /// See \ref resetParams() for examples.
+    ///
+    /// \return <tt>(*this)</tt>
+    ///
+    /// \see resetParams(), run()
+    CycleCanceling& reset() {
+      // Resize vectors
+      _node_num = countNodes(_graph);
+      _arc_num = countArcs(_graph);
+      _res_node_num = _node_num + 1;
+      _res_arc_num = 2 * (_arc_num + _node_num);
+      _root = _node_num;
+
+      _first_out.resize(_res_node_num + 1);
+      _forward.resize(_res_arc_num);
+      _source.resize(_res_arc_num);
+      _target.resize(_res_arc_num);
+      _reverse.resize(_res_arc_num);
+
+      _lower.resize(_res_arc_num);
+      _upper.resize(_res_arc_num);
+      _cost.resize(_res_arc_num);
+      _supply.resize(_res_node_num);
+
+      _res_cap.resize(_res_arc_num);
+      _pi.resize(_res_node_num);
+
+      _arc_vec.reserve(_res_arc_num);
+      _cost_vec.reserve(_res_arc_num);
+      _id_vec.reserve(_res_arc_num);
+
+      // Copy the graph
+      int i = 0, j = 0, k = 2 * _arc_num + _node_num;
+      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
+        _node_id[n] = i;
+      }
+      i = 0;
+      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
+        _first_out[i] = j;
+        for (OutArcIt a(_graph, n); a != INVALID; ++a, ++j) {
+          _arc_idf[a] = j;
+          _forward[j] = true;
+          _source[j] = i;
+          _target[j] = _node_id[_graph.runningNode(a)];
+        }
+        for (InArcIt a(_graph, n); a != INVALID; ++a, ++j) {
+          _arc_idb[a] = j;
+          _forward[j] = false;
+          _source[j] = i;
+          _target[j] = _node_id[_graph.runningNode(a)];
+        }
+        _forward[j] = false;
+        _source[j] = i;
+        _target[j] = _root;
+        _reverse[j] = k;
+        _forward[k] = true;
+        _source[k] = _root;
+        _target[k] = i;
+        _reverse[k] = j;
+        ++j; ++k;
+      }
+      _first_out[i] = j;
+      _first_out[_res_node_num] = k;
+      for (ArcIt a(_graph); a != INVALID; ++a) {
+        int fi = _arc_idf[a];
+        int bi = _arc_idb[a];
+        _reverse[fi] = bi;
+        _reverse[bi] = fi;
+      }
+
+      // Reset parameters
+      resetParams();
       return *this;
     }
 
@@ -633,14 +663,14 @@ namespace lemon {
         _sum_supply += _supply[i];
       }
       if (_sum_supply > 0) return INFEASIBLE;
-      
+
 
       // Initialize vectors
       for (int i = 0; i != _res_node_num; ++i) {
         _pi[i] = 0;
       }
       ValueVector excess(_supply);
-      
+
       // Remove infinite upper bounds and check negative arcs
       const Value MAX = std::numeric_limits<Value>::max();
       int last_out;
@@ -740,10 +770,10 @@ namespace lemon {
           _cost[ra] = 0;
         }
       }
-      
+
       return OPTIMAL;
     }
-    
+
     // Build a StaticDigraph structure containing the current
     // residual network
     void buildResidualNetwork() {
@@ -799,14 +829,14 @@ namespace lemon {
       // Constants for computing the iteration limits
       const int BF_FIRST_LIMIT  = 2;
       const double BF_LIMIT_FACTOR = 1.5;
-      
+
       typedef StaticVectorMap<StaticDigraph::Arc, Value> FilterMap;
       typedef FilterArcs<StaticDigraph, FilterMap> ResDigraph;
       typedef StaticVectorMap<StaticDigraph::Node, StaticDigraph::Arc> PredMap;
       typedef typename BellmanFord<ResDigraph, CostArcMap>
         ::template SetDistMap<CostNodeMap>
         ::template SetPredMap<PredMap>::Create BF;
-      
+
       // Build the residual network
       _arc_vec.clear();
       _cost_vec.clear();
@@ -894,14 +924,14 @@ namespace lemon {
     void startMinMeanCycleCanceling() {
       typedef SimplePath<StaticDigraph> SPath;
       typedef typename SPath::ArcIt SPathArcIt;
-      typedef typename Howard<StaticDigraph, CostArcMap>
+      typedef typename HowardMmc<StaticDigraph, CostArcMap>
         ::template SetPath<SPath>::Create MMC;
-      
+
       SPath cycle;
       MMC mmc(_sgr, _cost_map);
       mmc.cycle(cycle);
       buildResidualNetwork();
-      while (mmc.findMinMean() && mmc.cycleLength() < 0) {
+      while (mmc.findCycleMean() && mmc.cycleCost() < 0) {
         // Find the cycle
         mmc.findCycle();
 
@@ -919,7 +949,7 @@ namespace lemon {
           _res_cap[_reverse[j]] += delta;
         }
 
-        // Rebuild the residual network        
+        // Rebuild the residual network
         buildResidualNetwork();
       }
     }
@@ -933,8 +963,8 @@ namespace lemon {
       // Contruct auxiliary data vectors
       DoubleVector pi(_res_node_num, 0.0);
       IntVector level(_res_node_num);
-      CharVector reached(_res_node_num);
-      CharVector processed(_res_node_num);
+      BoolVector reached(_res_node_num);
+      BoolVector processed(_res_node_num);
       IntVector pred_node(_res_node_num);
       IntVector pred_arc(_res_node_num);
       std::vector<int> stack(_res_node_num);
@@ -1102,18 +1132,18 @@ namespace lemon {
             }
           }
         } else {
-          typedef Howard<StaticDigraph, CostArcMap> MMC;
+          typedef HowardMmc<StaticDigraph, CostArcMap> MMC;
           typedef typename BellmanFord<StaticDigraph, CostArcMap>
             ::template SetDistMap<CostNodeMap>::Create BF;
 
           // Set epsilon to the minimum cycle mean
           buildResidualNetwork();
           MMC mmc(_sgr, _cost_map);
-          mmc.findMinMean();
+          mmc.findCycleMean();
           epsilon = -mmc.cycleMean();
-          Cost cycle_cost = mmc.cycleLength();
-          int cycle_size = mmc.cycleArcNum();
-          
+          Cost cycle_cost = mmc.cycleCost();
+          int cycle_size = mmc.cycleSize();
+
           // Compute feasible potentials for the current epsilon
           for (int i = 0; i != int(_cost_vec.size()); ++i) {
             _cost_vec[i] = cycle_size * _cost_vec[i] - cycle_cost;
@@ -1125,7 +1155,7 @@ namespace lemon {
           for (int u = 0; u != _res_node_num; ++u) {
             pi[u] = static_cast<double>(_pi[u]) / cycle_size;
           }
-        
+
           iter = limit;
         }
       }
