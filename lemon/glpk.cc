@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -31,6 +31,7 @@ namespace lemon {
   GlpkBase::GlpkBase() : LpBase() {
     lp = glp_create_prob();
     glp_create_index(lp);
+    messageLevel(MESSAGE_NOTHING);
   }
 
   GlpkBase::GlpkBase(const GlpkBase &other) : LpBase() {
@@ -39,6 +40,7 @@ namespace lemon {
     glp_create_index(lp);
     rows = other.rows;
     cols = other.cols;
+    messageLevel(MESSAGE_NOTHING);
   }
 
   GlpkBase::~GlpkBase() {
@@ -54,6 +56,42 @@ namespace lemon {
   int GlpkBase::_addRow() {
     int i = glp_add_rows(lp, 1);
     glp_set_row_bnds(lp, i, GLP_FR, 0.0, 0.0);
+    return i;
+  }
+
+  int GlpkBase::_addRow(Value lo, ExprIterator b,
+                        ExprIterator e, Value up) {
+    int i = glp_add_rows(lp, 1);
+
+    if (lo == -INF) {
+      if (up == INF) {
+        glp_set_row_bnds(lp, i, GLP_FR, lo, up);
+      } else {
+        glp_set_row_bnds(lp, i, GLP_UP, lo, up);
+      }
+    } else {
+      if (up == INF) {
+        glp_set_row_bnds(lp, i, GLP_LO, lo, up);
+      } else if (lo != up) {
+        glp_set_row_bnds(lp, i, GLP_DB, lo, up);
+      } else {
+        glp_set_row_bnds(lp, i, GLP_FX, lo, up);
+      }
+    }
+
+    std::vector<int> indexes;
+    std::vector<Value> values;
+
+    indexes.push_back(0);
+    values.push_back(0);
+
+    for(ExprIterator it = b; it != e; ++it) {
+      indexes.push_back(it->first);
+      values.push_back(it->second);
+    }
+
+    glp_set_mat_row(lp, i, values.size() - 1,
+                    &indexes.front(), &values.front());
     return i;
   }
 
@@ -518,12 +556,30 @@ namespace lemon {
 
   void GlpkBase::_clear() {
     glp_erase_prob(lp);
-    rows.clear();
-    cols.clear();
   }
 
   void GlpkBase::freeEnv() {
     glp_free_env();
+  }
+
+  void GlpkBase::_messageLevel(MessageLevel level) {
+    switch (level) {
+    case MESSAGE_NOTHING:
+      _message_level = GLP_MSG_OFF;
+      break;
+    case MESSAGE_ERROR:
+      _message_level = GLP_MSG_ERR;
+      break;
+    case MESSAGE_WARNING:
+      _message_level = GLP_MSG_ERR;
+      break;
+    case MESSAGE_NORMAL:
+      _message_level = GLP_MSG_ON;
+      break;
+    case MESSAGE_VERBOSE:
+      _message_level = GLP_MSG_ALL;
+      break;
+    }
   }
 
   GlpkBase::FreeEnvHelper GlpkBase::freeEnvHelper;
@@ -532,12 +588,12 @@ namespace lemon {
 
   GlpkLp::GlpkLp()
     : LpBase(), LpSolver(), GlpkBase() {
-    messageLevel(MESSAGE_NO_OUTPUT);
+    presolver(false);
   }
 
   GlpkLp::GlpkLp(const GlpkLp& other)
     : LpBase(other), LpSolver(other), GlpkBase(other) {
-    messageLevel(MESSAGE_NO_OUTPUT);
+    presolver(false);
   }
 
   GlpkLp* GlpkLp::newSolver() const { return new GlpkLp; }
@@ -560,22 +616,26 @@ namespace lemon {
     glp_smcp smcp;
     glp_init_smcp(&smcp);
 
-    switch (_message_level) {
-    case MESSAGE_NO_OUTPUT:
-      smcp.msg_lev = GLP_MSG_OFF;
+    smcp.msg_lev = _message_level;
+    smcp.presolve = _presolve;
+
+    // If the basis is not valid we get an error return value.
+    // In this case we can try to create a new basis.
+    switch (glp_simplex(lp, &smcp)) {
+    case 0:
       break;
-    case MESSAGE_ERROR_MESSAGE:
-      smcp.msg_lev = GLP_MSG_ERR;
+    case GLP_EBADB:
+    case GLP_ESING:
+    case GLP_ECOND:
+      glp_term_out(false);
+      glp_adv_basis(lp, 0);
+      glp_term_out(true);
+      if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
       break;
-    case MESSAGE_NORMAL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ON;
-      break;
-    case MESSAGE_FULL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ALL;
-      break;
+    default:
+      return UNSOLVED;
     }
 
-    if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
     return SOLVED;
   }
 
@@ -585,23 +645,26 @@ namespace lemon {
     glp_smcp smcp;
     glp_init_smcp(&smcp);
 
-    switch (_message_level) {
-    case MESSAGE_NO_OUTPUT:
-      smcp.msg_lev = GLP_MSG_OFF;
-      break;
-    case MESSAGE_ERROR_MESSAGE:
-      smcp.msg_lev = GLP_MSG_ERR;
-      break;
-    case MESSAGE_NORMAL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ON;
-      break;
-    case MESSAGE_FULL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ALL;
-      break;
-    }
+    smcp.msg_lev = _message_level;
     smcp.meth = GLP_DUAL;
+    smcp.presolve = _presolve;
 
-    if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
+    // If the basis is not valid we get an error return value.
+    // In this case we can try to create a new basis.
+    switch (glp_simplex(lp, &smcp)) {
+    case 0:
+      break;
+    case GLP_EBADB:
+    case GLP_ESING:
+    case GLP_ECOND:
+      glp_term_out(false);
+      glp_adv_basis(lp, 0);
+      glp_term_out(true);
+      if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
+      break;
+    default:
+      return UNSOLVED;
+    }
     return SOLVED;
   }
 
@@ -819,24 +882,18 @@ namespace lemon {
     }
   }
 
-  void GlpkLp::presolver(bool b) {
-    lpx_set_int_parm(lp, LPX_K_PRESOL, b ? 1 : 0);
-  }
-
-  void GlpkLp::messageLevel(MessageLevel m) {
-    _message_level = m;
+  void GlpkLp::presolver(bool presolve) {
+    _presolve = presolve;
   }
 
   // GlpkMip members
 
   GlpkMip::GlpkMip()
     : LpBase(), MipSolver(), GlpkBase() {
-    messageLevel(MESSAGE_NO_OUTPUT);
   }
 
   GlpkMip::GlpkMip(const GlpkMip& other)
     : LpBase(), MipSolver(), GlpkBase(other) {
-    messageLevel(MESSAGE_NO_OUTPUT);
   }
 
   void GlpkMip::_setColType(int i, GlpkMip::ColTypes col_type) {
@@ -865,42 +922,32 @@ namespace lemon {
     glp_smcp smcp;
     glp_init_smcp(&smcp);
 
-    switch (_message_level) {
-    case MESSAGE_NO_OUTPUT:
-      smcp.msg_lev = GLP_MSG_OFF;
-      break;
-    case MESSAGE_ERROR_MESSAGE:
-      smcp.msg_lev = GLP_MSG_ERR;
-      break;
-    case MESSAGE_NORMAL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ON;
-      break;
-    case MESSAGE_FULL_OUTPUT:
-      smcp.msg_lev = GLP_MSG_ALL;
-      break;
-    }
+    smcp.msg_lev = _message_level;
     smcp.meth = GLP_DUAL;
 
-    if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
+    // If the basis is not valid we get an error return value.
+    // In this case we can try to create a new basis.
+    switch (glp_simplex(lp, &smcp)) {
+    case 0:
+      break;
+    case GLP_EBADB:
+    case GLP_ESING:
+    case GLP_ECOND:
+      glp_term_out(false);
+      glp_adv_basis(lp, 0);
+      glp_term_out(true);
+      if (glp_simplex(lp, &smcp) != 0) return UNSOLVED;
+      break;
+    default:
+      return UNSOLVED;
+    }
+
     if (glp_get_status(lp) != GLP_OPT) return SOLVED;
 
     glp_iocp iocp;
     glp_init_iocp(&iocp);
 
-    switch (_message_level) {
-    case MESSAGE_NO_OUTPUT:
-      iocp.msg_lev = GLP_MSG_OFF;
-      break;
-    case MESSAGE_ERROR_MESSAGE:
-      iocp.msg_lev = GLP_MSG_ERR;
-      break;
-    case MESSAGE_NORMAL_OUTPUT:
-      iocp.msg_lev = GLP_MSG_ON;
-      break;
-    case MESSAGE_FULL_OUTPUT:
-      iocp.msg_lev = GLP_MSG_ALL;
-      break;
-    }
+    iocp.msg_lev = _message_level;
 
     if (glp_intopt(lp, &iocp) != 0) return UNSOLVED;
     return SOLVED;
@@ -950,9 +997,5 @@ namespace lemon {
   GlpkMip* GlpkMip::cloneSolver() const {return new GlpkMip(*this); }
 
   const char* GlpkMip::_solverName() const { return "GlpkMip"; }
-
-  void GlpkMip::messageLevel(MessageLevel m) {
-    _message_level = m;
-  }
 
 } //END OF NAMESPACE LEMON

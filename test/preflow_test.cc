@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2011
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -84,18 +84,28 @@ void checkPreflowCompile()
   CapMap cap;
   FlowMap flow;
   CutMap cut;
+  VType v;
+  bool b;
+  ::lemon::ignore_unused_variable_warning(v,b);
 
-  Preflow<Digraph, CapMap>
-    ::SetFlowMap<FlowMap>
-    ::SetElevator<Elev>
-    ::SetStandardElevator<LinkedElev>
-    ::Create preflow_test(g,cap,n,n);
+  typedef Preflow<Digraph, CapMap>
+            ::SetFlowMap<FlowMap>
+            ::SetElevator<Elev>
+            ::SetStandardElevator<LinkedElev>
+            ::Create PreflowType;
+  PreflowType preflow_test(g, cap, n, n);
+  const PreflowType& const_preflow_test = preflow_test;
 
-  preflow_test.capacityMap(cap);
-  flow = preflow_test.flowMap();
-  preflow_test.flowMap(flow);
-  preflow_test.source(n);
-  preflow_test.target(n);
+  const PreflowType::Elevator& elev = const_preflow_test.elevator();
+  preflow_test.elevator(const_cast<PreflowType::Elevator&>(elev));
+  PreflowType::Tolerance tol = const_preflow_test.tolerance();
+  preflow_test.tolerance(tol);
+
+  preflow_test
+    .capacityMap(cap)
+    .flowMap(flow)
+    .source(n)
+    .target(n);
 
   preflow_test.init();
   preflow_test.init(cap);
@@ -104,11 +114,13 @@ void checkPreflowCompile()
   preflow_test.run();
   preflow_test.runMinCut();
 
-  preflow_test.flowValue();
-  preflow_test.minCut(n);
-  preflow_test.minCutMap(cut);
-  preflow_test.flow(e);
+  v = const_preflow_test.flowValue();
+  v = const_preflow_test.flow(e);
+  const FlowMap& fm = const_preflow_test.flowMap();
+  b = const_preflow_test.minCut(n);
+  const_preflow_test.minCutMap(cut);
 
+  ::lemon::ignore_unused_variable_warning(fm);
 }
 
 int cutValue (const SmartDigraph& g,
@@ -144,6 +156,30 @@ bool checkFlow(const SmartDigraph& g,
   }
   return true;
 }
+
+void initFlowTest()
+{
+  DIGRAPH_TYPEDEFS(SmartDigraph);
+
+  SmartDigraph g;
+  SmartDigraph::ArcMap<int> cap(g),iflow(g);
+  Node s=g.addNode(); Node t=g.addNode();
+  Node n1=g.addNode(); Node n2=g.addNode();
+  Arc a;
+  a=g.addArc(s,n1); cap[a]=20; iflow[a]=20;
+  a=g.addArc(n1,n2); cap[a]=10; iflow[a]=0;
+  a=g.addArc(n2,t); cap[a]=20; iflow[a]=0;
+
+  Preflow<SmartDigraph> pre(g,cap,s,t);
+  pre.init(iflow);
+  pre.startFirstPhase();
+  check(pre.flowValue() == 10, "The incorrect max flow value.");
+  check(pre.minCut(s), "Wrong min cut (Node s).");
+  check(pre.minCut(n1), "Wrong min cut (Node n1).");
+  check(!pre.minCut(n2), "Wrong min cut (Node n2).");
+  check(!pre.minCut(t), "Wrong min cut (Node t).");
+}
+
 
 int main() {
 
@@ -234,6 +270,8 @@ int main() {
 
   check(preflow_test.flowValue() == min_cut_value,
         "The max flow value or the three min cut values are incorrect.");
+
+  initFlowTest();
 
   return 0;
 }

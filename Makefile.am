@@ -11,9 +11,13 @@ EXTRA_DIST = \
 	m4/lx_check_cplex.m4 \
 	m4/lx_check_glpk.m4 \
 	m4/lx_check_soplex.m4 \
+	m4/lx_check_coin.m4 \
 	CMakeLists.txt \
 	cmake/FindGhostscript.cmake \
+	cmake/FindCPLEX.cmake \
 	cmake/FindGLPK.cmake \
+	cmake/FindCOIN.cmake \
+	cmake/LEMONConfig.cmake.in \
 	cmake/version.cmake.in \
 	cmake/version.cmake \
 	cmake/nsis/lemon.ico \
@@ -39,8 +43,13 @@ XFAIL_TESTS =
 include lemon/Makefile.am
 include test/Makefile.am
 include doc/Makefile.am
-include demo/Makefile.am
 include tools/Makefile.am
+include scripts/Makefile.am
+
+DIST_SUBDIRS = demo
+
+demo:
+	$(MAKE) $(AM_MAKEFLAGS) -C demo
 
 MRPROPERFILES = \
 	aclocal.m4 \
@@ -68,4 +77,4 @@ distcheck-bz2: distcheck
 	zcat $(PACKAGE)-$(VERSION).tar.gz | \
 	bzip2 --best -c > $(PACKAGE)-$(VERSION).tar.bz2
 
-.PHONY: mrproper dist-bz2 distcheck-bz2
+.PHONY: demo mrproper dist-bz2 distcheck-bz2

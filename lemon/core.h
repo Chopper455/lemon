@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -22,10 +22,31 @@
 #include <vector>
 #include <algorithm>
 
-#include <lemon/core.h>
+#include <lemon/config.h>
 #include <lemon/bits/enable_if.h>
 #include <lemon/bits/traits.h>
 #include <lemon/assert.h>
+
+// Disable the following warnings when compiling with MSVC:
+// C4250: 'class1' : inherits 'class2::member' via dominance
+// C4355: 'this' : used in base member initializer list
+// C4503: 'function' : decorated name length exceeded, name was truncated
+// C4800: 'type' : forcing value to bool 'true' or 'false' (performance warning)
+// C4996: 'function': was declared deprecated
+#ifdef _MSC_VER
+#pragma warning( disable : 4250 4355 4503 4800 4996 )
+#endif
+
+#ifdef __GNUC__
+#define GCC_VERSION (__GNUC__ * 10000                   \
+                     + __GNUC_MINOR__ * 100             \
+                     + __GNUC_PATCHLEVEL__)
+#endif
+
+#if GCC_VERSION >= 40800
+// Needed by the [DI]GRAPH_TYPEDEFS marcos for gcc 4.8
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#endif
 
 ///\file
 ///\brief LEMON core utilities.
@@ -384,6 +405,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename ArcRefMap>
       static void copy(const From& from, Digraph &to,
                        NodeRefMap& nodeRefMap, ArcRefMap& arcRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -411,6 +433,7 @@ namespace lemon {
       template <typename From, typename NodeRefMap, typename EdgeRefMap>
       static void copy(const From& from, Graph &to,
                        NodeRefMap& nodeRefMap, EdgeRefMap& edgeRefMap) {
+        to.clear();
         for (typename From::NodeIt it(from); it != INVALID; ++it) {
           nodeRefMap[it] = to.addNode();
         }
@@ -1036,26 +1059,25 @@ namespace lemon {
   ///\sa ArcLookUp, AllArcLookUp, DynArcLookUp
   template <typename GR>
   class ConArcIt : public GR::Arc {
+    typedef typename GR::Arc Parent;
+
   public:
 
-    typedef GR Graph;
-    typedef typename Graph::Arc Parent;
-
-    typedef typename Graph::Arc Arc;
-    typedef typename Graph::Node Node;
+    typedef typename GR::Arc Arc;
+    typedef typename GR::Node Node;
 
     /// \brief Constructor.
     ///
     /// Construct a new ConArcIt iterating on the arcs that
     /// connects nodes \c u and \c v.
-    ConArcIt(const Graph& g, Node u, Node v) : _graph(g) {
+    ConArcIt(const GR& g, Node u, Node v) : _graph(g) {
       Parent::operator=(findArc(_graph, u, v));
     }
 
     /// \brief Constructor.
     ///
     /// Construct a new ConArcIt that continues the iterating from arc \c a.
-    ConArcIt(const Graph& g, Arc a) : Parent(a), _graph(g) {}
+    ConArcIt(const GR& g, Arc a) : Parent(a), _graph(g) {}
 
     /// \brief Increment operator.
     ///
@@ -1066,7 +1088,7 @@ namespace lemon {
       return *this;
     }
   private:
-    const Graph& _graph;
+    const GR& _graph;
   };
 
   namespace _core_bits {
@@ -1159,26 +1181,25 @@ namespace lemon {
   ///\sa findEdge()
   template <typename GR>
   class ConEdgeIt : public GR::Edge {
+    typedef typename GR::Edge Parent;
+
   public:
 
-    typedef GR Graph;
-    typedef typename Graph::Edge Parent;
-
-    typedef typename Graph::Edge Edge;
-    typedef typename Graph::Node Node;
+    typedef typename GR::Edge Edge;
+    typedef typename GR::Node Node;
 
     /// \brief Constructor.
     ///
     /// Construct a new ConEdgeIt iterating on the edges that
     /// connects nodes \c u and \c v.
-    ConEdgeIt(const Graph& g, Node u, Node v) : _graph(g), _u(u), _v(v) {
+    ConEdgeIt(const GR& g, Node u, Node v) : _graph(g), _u(u), _v(v) {
       Parent::operator=(findEdge(_graph, _u, _v));
     }
 
     /// \brief Constructor.
     ///
     /// Construct a new ConEdgeIt that continues iterating from edge \c e.
-    ConEdgeIt(const Graph& g, Edge e) : Parent(e), _graph(g) {}
+    ConEdgeIt(const GR& g, Edge e) : Parent(e), _graph(g) {}
 
     /// \brief Increment operator.
     ///
@@ -1188,7 +1209,7 @@ namespace lemon {
       return *this;
     }
   private:
-    const Graph& _graph;
+    const GR& _graph;
     Node _u, _v;
   };
 
@@ -1219,19 +1240,23 @@ namespace lemon {
   class DynArcLookUp
     : protected ItemSetTraits<GR, typename GR::Arc>::ItemNotifier::ObserverBase
   {
-  public:
     typedef typename ItemSetTraits<GR, typename GR::Arc>
     ::ItemNotifier::ObserverBase Parent;
 
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
+
+  public:
+
+    /// The Digraph type
     typedef GR Digraph;
 
   protected:
 
-    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type {
-    public:
-
+    class AutoNodeMap : public ItemSetTraits<GR, Node>::template Map<Arc>::Type
+    {
       typedef typename ItemSetTraits<GR, Node>::template Map<Arc>::Type Parent;
+
+    public:
 
       AutoNodeMap(const GR& digraph) : Parent(digraph, INVALID) {}
 
@@ -1257,12 +1282,6 @@ namespace lemon {
       }
     };
 
-    const Digraph &_g;
-    AutoNodeMap _head;
-    typename Digraph::template ArcMap<Arc> _parent;
-    typename Digraph::template ArcMap<Arc> _left;
-    typename Digraph::template ArcMap<Arc> _right;
-
     class ArcLess {
       const Digraph &g;
     public:
@@ -1272,6 +1291,14 @@ namespace lemon {
         return g.target(a)<g.target(b);
       }
     };
+
+  protected:
+
+    const Digraph &_g;
+    AutoNodeMap _head;
+    typename Digraph::template ArcMap<Arc> _parent;
+    typename Digraph::template ArcMap<Arc> _left;
+    typename Digraph::template ArcMap<Arc> _right;
 
   public:
 
@@ -1315,27 +1342,27 @@ namespace lemon {
 
     virtual void clear() {
       for(NodeIt n(_g);n!=INVALID;++n) {
-        _head.set(n, INVALID);
+        _head[n] = INVALID;
       }
     }
 
     void insert(Arc arc) {
       Node s = _g.source(arc);
       Node t = _g.target(arc);
-      _left.set(arc, INVALID);
-      _right.set(arc, INVALID);
+      _left[arc] = INVALID;
+      _right[arc] = INVALID;
 
       Arc e = _head[s];
       if (e == INVALID) {
-        _head.set(s, arc);
-        _parent.set(arc, INVALID);
+        _head[s] = arc;
+        _parent[arc] = INVALID;
         return;
       }
       while (true) {
         if (t < _g.target(e)) {
           if (_left[e] == INVALID) {
-            _left.set(e, arc);
-            _parent.set(arc, e);
+            _left[e] = arc;
+            _parent[arc] = e;
             splay(arc);
             return;
           } else {
@@ -1343,8 +1370,8 @@ namespace lemon {
           }
         } else {
           if (_right[e] == INVALID) {
-            _right.set(e, arc);
-            _parent.set(arc, e);
+            _right[e] = arc;
+            _parent[arc] = e;
             splay(arc);
             return;
           } else {
@@ -1357,27 +1384,27 @@ namespace lemon {
     void remove(Arc arc) {
       if (_left[arc] == INVALID) {
         if (_right[arc] != INVALID) {
-          _parent.set(_right[arc], _parent[arc]);
+          _parent[_right[arc]] = _parent[arc];
         }
         if (_parent[arc] != INVALID) {
           if (_left[_parent[arc]] == arc) {
-            _left.set(_parent[arc], _right[arc]);
+            _left[_parent[arc]] = _right[arc];
           } else {
-            _right.set(_parent[arc], _right[arc]);
+            _right[_parent[arc]] = _right[arc];
           }
         } else {
-          _head.set(_g.source(arc), _right[arc]);
+          _head[_g.source(arc)] = _right[arc];
         }
       } else if (_right[arc] == INVALID) {
-        _parent.set(_left[arc], _parent[arc]);
+        _parent[_left[arc]] = _parent[arc];
         if (_parent[arc] != INVALID) {
           if (_left[_parent[arc]] == arc) {
-            _left.set(_parent[arc], _left[arc]);
+            _left[_parent[arc]] = _left[arc];
           } else {
-            _right.set(_parent[arc], _left[arc]);
+            _right[_parent[arc]] = _left[arc];
           }
         } else {
-          _head.set(_g.source(arc), _left[arc]);
+          _head[_g.source(arc)] = _left[arc];
         }
       } else {
         Arc e = _left[arc];
@@ -1387,38 +1414,38 @@ namespace lemon {
             e = _right[e];
           }
           Arc s = _parent[e];
-          _right.set(_parent[e], _left[e]);
+          _right[_parent[e]] = _left[e];
           if (_left[e] != INVALID) {
-            _parent.set(_left[e], _parent[e]);
+            _parent[_left[e]] = _parent[e];
           }
 
-          _left.set(e, _left[arc]);
-          _parent.set(_left[arc], e);
-          _right.set(e, _right[arc]);
-          _parent.set(_right[arc], e);
+          _left[e] = _left[arc];
+          _parent[_left[arc]] = e;
+          _right[e] = _right[arc];
+          _parent[_right[arc]] = e;
 
-          _parent.set(e, _parent[arc]);
+          _parent[e] = _parent[arc];
           if (_parent[arc] != INVALID) {
             if (_left[_parent[arc]] == arc) {
-              _left.set(_parent[arc], e);
+              _left[_parent[arc]] = e;
             } else {
-              _right.set(_parent[arc], e);
+              _right[_parent[arc]] = e;
             }
           }
           splay(s);
         } else {
-          _right.set(e, _right[arc]);
-          _parent.set(_right[arc], e);
-          _parent.set(e, _parent[arc]);
+          _right[e] = _right[arc];
+          _parent[_right[arc]] = e;
+          _parent[e] = _parent[arc];
 
           if (_parent[arc] != INVALID) {
             if (_left[_parent[arc]] == arc) {
-              _left.set(_parent[arc], e);
+              _left[_parent[arc]] = e;
             } else {
-              _right.set(_parent[arc], e);
+              _right[_parent[arc]] = e;
             }
           } else {
-            _head.set(_g.source(arc), e);
+            _head[_g.source(arc)] = e;
           }
         }
       }
@@ -1430,17 +1457,17 @@ namespace lemon {
       Arc me=v[m];
       if (a < m) {
         Arc left = refreshRec(v,a,m-1);
-        _left.set(me, left);
-        _parent.set(left, me);
+        _left[me] = left;
+        _parent[left] = me;
       } else {
-        _left.set(me, INVALID);
+        _left[me] = INVALID;
       }
       if (m < b) {
         Arc right = refreshRec(v,m+1,b);
-        _right.set(me, right);
-        _parent.set(right, me);
+        _right[me] = right;
+        _parent[right] = me;
       } else {
-        _right.set(me, INVALID);
+        _right[me] = INVALID;
       }
       return me;
     }
@@ -1452,46 +1479,46 @@ namespace lemon {
         if (!v.empty()) {
           std::sort(v.begin(),v.end(),ArcLess(_g));
           Arc head = refreshRec(v,0,v.size()-1);
-          _head.set(n, head);
-          _parent.set(head, INVALID);
+          _head[n] = head;
+          _parent[head] = INVALID;
         }
-        else _head.set(n, INVALID);
+        else _head[n] = INVALID;
       }
     }
 
     void zig(Arc v) {
       Arc w = _parent[v];
-      _parent.set(v, _parent[w]);
-      _parent.set(w, v);
-      _left.set(w, _right[v]);
-      _right.set(v, w);
+      _parent[v] = _parent[w];
+      _parent[w] = v;
+      _left[w] = _right[v];
+      _right[v] = w;
       if (_parent[v] != INVALID) {
         if (_right[_parent[v]] == w) {
-          _right.set(_parent[v], v);
+          _right[_parent[v]] = v;
         } else {
-          _left.set(_parent[v], v);
+          _left[_parent[v]] = v;
         }
       }
       if (_left[w] != INVALID){
-        _parent.set(_left[w], w);
+        _parent[_left[w]] = w;
       }
     }
 
     void zag(Arc v) {
       Arc w = _parent[v];
-      _parent.set(v, _parent[w]);
-      _parent.set(w, v);
-      _right.set(w, _left[v]);
-      _left.set(v, w);
+      _parent[v] = _parent[w];
+      _parent[w] = v;
+      _right[w] = _left[v];
+      _left[v] = w;
       if (_parent[v] != INVALID){
         if (_left[_parent[v]] == w) {
-          _left.set(_parent[v], v);
+          _left[_parent[v]] = v;
         } else {
-          _right.set(_parent[v], v);
+          _right[_parent[v]] = v;
         }
       }
       if (_right[w] != INVALID){
-        _parent.set(_right[w], w);
+        _parent[_right[w]] = w;
       }
     }
 
@@ -1630,8 +1657,11 @@ namespace lemon {
   template<class GR>
   class ArcLookUp
   {
-  public:
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
+
+  public:
+
+    /// The Digraph type
     typedef GR Digraph;
 
   protected:
@@ -1746,9 +1776,8 @@ namespace lemon {
     using ArcLookUp<GR>::_head;
 
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
-    typedef GR Digraph;
 
-    typename Digraph::template ArcMap<Arc> _next;
+    typename GR::template ArcMap<Arc> _next;
 
     Arc refreshNext(Arc head,Arc next=INVALID)
     {
@@ -1767,6 +1796,10 @@ namespace lemon {
     }
 
   public:
+
+    /// The Digraph type
+    typedef GR Digraph;
+
     ///Constructor
 
     ///Constructor.
@@ -1827,15 +1860,26 @@ namespace lemon {
     ///this operator. If you change the outgoing arcs of
     ///a single node \c n, then \ref refresh(Node) "refresh(n)" is enough.
     ///
-#ifdef DOXYGEN
-    Arc operator()(Node s, Node t, Arc prev=INVALID) const {}
-#else
-    using ArcLookUp<GR>::operator() ;
-    Arc operator()(Node s, Node t, Arc prev) const
+    Arc operator()(Node s, Node t, Arc prev=INVALID) const
     {
-      return prev==INVALID?(*this)(s,t):_next[prev];
+      if(prev==INVALID)
+        {
+          Arc f=INVALID;
+          Arc e;
+          for(e=_head[s];
+              e!=INVALID&&_g.target(e)!=t;
+              e = t < _g.target(e)?_left[e]:_right[e]) ;
+          while(e!=INVALID)
+            if(_g.target(e)==t)
+              {
+                f = e;
+                e = _left[e];
+              }
+            else e = _right[e];
+          return f;
+        }
+      else return _next[prev];
     }
-#endif
 
   };
 

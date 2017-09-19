@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2010
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -22,13 +22,13 @@
 #include<lemon/config.h>
 
 
-#ifdef HAVE_GLPK
+#ifdef LEMON_HAVE_GLPK
 #include <lemon/glpk.h>
-#elif HAVE_CPLEX
+#elif LEMON_HAVE_CPLEX
 #include <lemon/cplex.h>
-#elif HAVE_SOPLEX
+#elif LEMON_HAVE_SOPLEX
 #include <lemon/soplex.h>
-#elif HAVE_CLP
+#elif LEMON_HAVE_CLP
 #include <lemon/clp.h>
 #endif
 
@@ -69,22 +69,22 @@ namespace lemon {
   ///Currently, it is either \c GlpkMip or \c CplexMip
   typedef GlpkMip Mip;
 #else
-#ifdef HAVE_GLPK
+#ifdef LEMON_HAVE_GLPK
 # define LEMON_DEFAULT_LP GLPK
   typedef GlpkLp Lp;
 # define LEMON_DEFAULT_MIP GLPK
   typedef GlpkMip Mip;
-#elif HAVE_CPLEX
+#elif LEMON_HAVE_CPLEX
 # define LEMON_DEFAULT_LP CPLEX
   typedef CplexLp Lp;
 # define LEMON_DEFAULT_MIP CPLEX
   typedef CplexMip Mip;
-#elif HAVE_SOPLEX
+#elif LEMON_HAVE_SOPLEX
 # define DEFAULT_LP SOPLEX
   typedef SoplexLp Lp;
-#elif HAVE_CLP
+#elif LEMON_HAVE_CLP
 # define DEFAULT_LP CLP
-  typedef ClpLp Lp;  
+  typedef ClpLp Lp;
 #endif
 #endif
 
