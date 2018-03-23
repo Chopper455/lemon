@@ -1,4 +1,17 @@
-CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+
+IF(POLICY CMP0048) 
+  CMAKE_POLICY(SET CMP0048 OLD) 
+ENDIF(POLICY CMP0048)
+
+IF(POLICY CMP0043) 
+  CMAKE_POLICY(SET CMP0043 OLD) 
+ENDIF(POLICY CMP0043)
+
+IF(POLICY CMP0026)
+  #This is for copying the dll's needed by glpk (in lp_test and mip_test)
+  CMAKE_POLICY(SET CMP0026 OLD) 
+ENDIF(POLICY CMP0026)
 
 SET(PROJECT_NAME "LEMON")
 PROJECT(${PROJECT_NAME})
@@ -62,6 +75,10 @@ SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 FIND_PACKAGE(Doxygen)
 FIND_PACKAGE(Ghostscript)
 
+IF(WIN32)
+  SET(LEMON_WIN32 TRUE)
+ENDIF(WIN32)
+
 SET(LEMON_ENABLE_GLPK YES CACHE STRING "Enable GLPK solver backend.")
 SET(LEMON_ENABLE_ILOG YES CACHE STRING "Enable ILOG (CPLEX) solver backend.")
 SET(LEMON_ENABLE_COIN YES CACHE STRING "Enable COIN solver backend.")
@@ -121,6 +138,9 @@ IF(NOT LEMON_DEFAULT_LP OR
     (NOT SOPLEX_FOUND AND (LEMON_DEFAULT_LP STREQUAL "SOPLEX")))
   SET(LEMON_DEFAULT_LP ${DEFAULT_LP} CACHE STRING
     "Default LP solver backend (GLPK, CPLEX, CLP or SOPLEX)" FORCE)
+ELSE()
+  SET(LEMON_DEFAULT_LP ${DEFAULT_LP} CACHE STRING
+    "Default LP solver backend (GLPK, CPLEX, CLP or SOPLEX)")
 ENDIF()
 IF(NOT LEMON_DEFAULT_MIP OR
     (NOT ILOG_FOUND AND (LEMON_DEFAULT_MIP STREQUAL "CPLEX")) OR
@@ -128,6 +148,9 @@ IF(NOT LEMON_DEFAULT_MIP OR
     (NOT GLPK_FOUND AND (LEMON_DEFAULT_MIP STREQUAL "GLPK")))
   SET(LEMON_DEFAULT_MIP ${DEFAULT_MIP} CACHE STRING
     "Default MIP solver backend (GLPK, CPLEX or CBC)" FORCE)
+ELSE()
+  SET(LEMON_DEFAULT_MIP ${DEFAULT_MIP} CACHE STRING
+    "Default MIP solver backend (GLPK, CPLEX or CBC)")
 ENDIF()
 
 
@@ -140,10 +163,13 @@ ELSE()
     SET(CMAKE_C_FLAGS_DEBUG CACHE STRING "-ggdb")
   ELSEIF(MSVC)
     # This part is unnecessary 'casue the same is set by the lemon/core.h.
-    # Still keep it as an example.
-    SET(CXX_WARNING "/wd4250 /wd4355 /wd4503 /wd4800 /wd4996")
+    # Still kept as an example.
+
+    # SET(CXX_WARNING "/wd4250 /wd4267 /wd4355 /wd4503 /wd4800 /wd4996")
+
     # Suppressed warnings:
     # C4250: 'class1' : inherits 'class2::member' via dominance
+    # C4267: conversion from 'size_t' to 'type', possible loss of data
     # C4355: 'this' : used in base member initializer list
     # C4503: 'function' : decorated name length exceeded, name was truncated
     # C4800: 'type' : forcing value to bool 'true' or 'false'
@@ -158,6 +184,7 @@ SET(LEMON_CXX_WARNING_FLAGS ${CXX_WARNING} CACHE STRING "LEMON warning flags.")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${LEMON_CXX_WARNING_FLAGS}")
 
 IF(MSVC)
+  SET(CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
   SET( CMAKE_CXX_FLAGS_MAINTAINER "/WX ${CMAKE_CXX_FLAGS_DEBUG}" CACHE STRING
     "Flags used by the C++ compiler during maintainer builds."
     )
@@ -180,11 +207,11 @@ ELSE()
     "Flags used by the C compiler during maintainer builds."
     )
   SET( CMAKE_EXE_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    "${CMAKE_EXE_LINKER_FLAGS_DEBUG}" CACHE STRING
     "Flags used for linking binaries during maintainer builds."
     )
   SET( CMAKE_SHARED_LINKER_FLAGS_MAINTAINER
-    "-Wl,--warn-unresolved-symbols,--warn-once" CACHE STRING
+    "${CMAKE_SHARED_LINKER_FLAGS_DEBUG}" CACHE STRING
     "Flags used by the shared libraries linker during maintainer builds."
     )
 ENDIF()
@@ -211,6 +238,10 @@ SET( CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
     "Choose the type of build, options are: None(CMAKE_CXX_FLAGS or CMAKE_C_FLAGS used) Debug Release RelWithDebInfo MinSizeRel Maintainer."
     FORCE )
 
+SET_DIRECTORY_PROPERTIES(PROPERTIES
+  COMPILE_DEFINITIONS_DEBUG "LEMON_ENABLE_DEBUG"
+  COMPILE_DEFINITIONS_MAINTAINER "LEMON_ENABLE_DEBUG"
+)
 
 INCLUDE(CheckTypeSize)
 CHECK_TYPE_SIZE("long long" LONG_LONG)
@@ -239,6 +270,14 @@ ELSEIF(LEMON_THREADING STREQUAL "Win32")
 ENDIF()
 
 ENABLE_TESTING()
+
+
+INCLUDE(CheckCXXCompilerFlag)
+CHECK_CXX_COMPILER_FLAG("-std=c++11" LEMON_CXX11)
+IF(LEMON_CXX11)
+  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+ENDIF()
+
 
 IF(${CMAKE_BUILD_TYPE} STREQUAL "Maintainer")
   ADD_CUSTOM_TARGET(check ALL COMMAND ${CMAKE_CTEST_COMMAND})

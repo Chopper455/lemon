@@ -127,7 +127,8 @@ void solve_min(ArgParser &ap, std::istream &is, std::ostream &,
   typename MCF::ProblemType res = ns.run();
   if (report) {
     std::cerr << "Run NetworkSimplex: " << ti << "\n\n";
-    std::cerr << "Feasible flow: " << (res == MCF::OPTIMAL ? "found" : "not found") << '\n';
+    std::cerr << "Feasible flow: " << (res == MCF::OPTIMAL ? "found" :
+                                       "not found") << '\n';
     if (res) std::cerr << "Min flow cost: "
                        << ns.template totalCost<LargeValue>() << '\n';
   }
@@ -221,11 +222,13 @@ int main(int argc, const char *argv[]) {
       if (!output) {
         throw IoError("Cannot open the file for writing", ap.files()[1]);
       }
+      // fall through
     case 1:
       input.open(ap.files()[0].c_str());
       if (!input) {
         throw IoError("File cannot be found", ap.files()[0]);
       }
+      // fall through
     case 0:
       break;
     default:
@@ -250,6 +253,7 @@ int main(int argc, const char *argv[]) {
           break;
         case DimacsDescriptor::SP:
           std::cout << "sp";
+          break;
         case DimacsDescriptor::MAT:
           std::cout << "mat";
           break;

@@ -20,7 +20,7 @@
 #include <lemon/lp_skeleton.h>
 #include "test_tools.h"
 #include <lemon/tolerance.h>
-
+#include <lemon/concept_check.h>
 #include <lemon/config.h>
 
 #ifdef LEMON_HAVE_GLPK
@@ -39,17 +39,30 @@
 #include <lemon/clp.h>
 #endif
 
+#ifdef LEMON_HAVE_LP
+#include <lemon/lp.h>
+#endif
 using namespace lemon;
 
 int countCols(LpBase & lp) {
   int count=0;
   for (LpBase::ColIt c(lp); c!=INVALID; ++c) ++count;
+#ifdef LEMON_CXX11
+  int cnt = 0;
+  for(auto c: lp.cols()) { cnt++; ::lemon::ignore_unused_variable_warning(c); }
+  check(count == cnt, "Wrong STL iterator");
+#endif
   return count;
 }
 
 int countRows(LpBase & lp) {
   int count=0;
   for (LpBase::RowIt r(lp); r!=INVALID; ++r) ++count;
+#ifdef LEMON_CXX11
+  int cnt = 0;
+  for(auto r: lp.rows()) { cnt++; ::lemon::ignore_unused_variable_warning(r); }
+  check(count == cnt, "Wrong STL iterator");
+#endif
   return count;
 }
 
@@ -415,6 +428,15 @@ int main()
 {
   LpSkeleton lp_skel;
   lpTest(lp_skel);
+
+#ifdef LEMON_HAVE_LP
+  {
+    Lp lp,lp2;
+    lpTest(lp);
+    aTest(lp2);
+    cloneTest<Lp>();
+  }
+#endif
 
 #ifdef LEMON_HAVE_GLPK
   {
