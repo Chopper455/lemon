@@ -1,8 +1,8 @@
-/* -*- C++ -*-
+/* -*- mode: C++; indent-tabs-mode: nil; -*-
  *
- * This file is a part of LEMON, a generic C++ optimization library
+ * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2008
+ * Copyright (C) 2003-2013
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -67,9 +67,16 @@ namespace lemon {
   ///
   /// \ref CapacityScaling implements the capacity scaling version
   /// of the successive shortest path algorithm for finding a
-  /// \ref min_cost_flow "minimum cost flow" \ref amo93networkflows,
-  /// \ref edmondskarp72theoretical. It is an efficient dual
-  /// solution method.
+  /// \ref min_cost_flow "minimum cost flow" \cite amo93networkflows,
+  /// \cite edmondskarp72theoretical. It is an efficient dual
+  /// solution method, which runs in polynomial time
+  /// \f$O(m\log U (n+m)\log n)\f$, where <i>U</i> denotes the maximum
+  /// of node supply and arc capacity values.
+  ///
+  /// This algorithm is typically slower than \ref CostScaling and
+  /// \ref NetworkSimplex, but in special cases, it can be more
+  /// efficient than them.
+  /// (For more information, see \ref min_cost_flow_algs "the module page".)
   ///
   /// Most of the parameters of the problem (except for the digraph)
   /// can be given using separate functions, and the algorithm can be
@@ -78,14 +85,20 @@ namespace lemon {
   ///
   /// \tparam GR The digraph type the algorithm runs on.
   /// \tparam V The number type used for flow amounts, capacity bounds
-  /// and supply values in the algorithm. By default it is \c int.
+  /// and supply values in the algorithm. By default, it is \c int.
   /// \tparam C The number type used for costs and potentials in the
-  /// algorithm. By default it is the same as \c V.
+  /// algorithm. By default, it is the same as \c V.
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm. By default, it is \ref CapacityScalingDefaultTraits
+  /// "CapacityScalingDefaultTraits<GR, V, C>".
+  /// In most cases, this parameter should not be set directly,
+  /// consider to use the named template parameters instead.
   ///
-  /// \warning Both number types must be signed and all input data must
-  /// be integer.
-  /// \warning This algorithm does not support negative costs for such
-  /// arcs that have infinite upper bound.
+  /// \warning Both \c V and \c C must be signed number types.
+  /// \warning Capacity bounds and supply values must be integer, but
+  /// arc costs can be arbitrary real numbers.
+  /// \warning This algorithm does not support negative costs for
+  /// arcs having infinite upper bound.
 #ifdef DOXYGEN
   template <typename GR, typename V, typename C, typename TR>
 #else
@@ -106,7 +119,8 @@ namespace lemon {
     /// The type of the heap used for internal Dijkstra computations
     typedef typename TR::Heap Heap;
 
-    /// The \ref CapacityScalingDefaultTraits "traits class" of the algorithm
+    /// \brief The \ref lemon::CapacityScalingDefaultTraits "traits class"
+    /// of the algorithm
     typedef TR Traits;
 
   public:
@@ -129,15 +143,16 @@ namespace lemon {
       /// these cases.
       UNBOUNDED
     };
-  
+
   private:
 
     TEMPLATE_DIGRAPH_TYPEDEFS(GR);
 
     typedef std::vector<int> IntVector;
-    typedef std::vector<char> BoolVector;
     typedef std::vector<Value> ValueVector;
     typedef std::vector<Cost> CostVector;
+    typedef std::vector<char> BoolVector;
+    // Note: vector<char> is used instead of vector<bool> for efficiency reasons
 
   private:
 
@@ -149,7 +164,7 @@ namespace lemon {
     int _root;
 
     // Parameters of the problem
-    bool _have_lower;
+    bool _has_lower;
     Value _sum_supply;
 
     // Data structures for storing the digraph
@@ -179,7 +194,7 @@ namespace lemon {
     IntVector _pred;
 
   public:
-  
+
     /// \brief Constant for infinite upper bounds (capacities).
     ///
     /// Constant for infinite upper bounds (capacities).
@@ -206,10 +221,10 @@ namespace lemon {
       const ValueVector &_excess;
       CostVector &_pi;
       IntVector &_pred;
-      
+
       IntVector _proc_nodes;
       CostVector _dist;
-      
+
     public:
 
       ResidualDijkstra(CapacityScaling& cs) :
@@ -296,6 +311,10 @@ namespace lemon {
 
     /// @}
 
+  protected:
+
+    CapacityScaling() {}
+
   public:
 
     /// \brief Constructor.
@@ -315,69 +334,7 @@ namespace lemon {
       LEMON_ASSERT(std::numeric_limits<Cost>::is_signed,
         "The cost type of CapacityScaling must be signed");
 
-      // Resize vectors
-      _node_num = countNodes(_graph);
-      _arc_num = countArcs(_graph);
-      _res_arc_num = 2 * (_arc_num + _node_num);
-      _root = _node_num;
-      ++_node_num;
-
-      _first_out.resize(_node_num + 1);
-      _forward.resize(_res_arc_num);
-      _source.resize(_res_arc_num);
-      _target.resize(_res_arc_num);
-      _reverse.resize(_res_arc_num);
-
-      _lower.resize(_res_arc_num);
-      _upper.resize(_res_arc_num);
-      _cost.resize(_res_arc_num);
-      _supply.resize(_node_num);
-      
-      _res_cap.resize(_res_arc_num);
-      _pi.resize(_node_num);
-      _excess.resize(_node_num);
-      _pred.resize(_node_num);
-
-      // Copy the graph
-      int i = 0, j = 0, k = 2 * _arc_num + _node_num - 1;
-      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
-        _node_id[n] = i;
-      }
-      i = 0;
-      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
-        _first_out[i] = j;
-        for (OutArcIt a(_graph, n); a != INVALID; ++a, ++j) {
-          _arc_idf[a] = j;
-          _forward[j] = true;
-          _source[j] = i;
-          _target[j] = _node_id[_graph.runningNode(a)];
-        }
-        for (InArcIt a(_graph, n); a != INVALID; ++a, ++j) {
-          _arc_idb[a] = j;
-          _forward[j] = false;
-          _source[j] = i;
-          _target[j] = _node_id[_graph.runningNode(a)];
-        }
-        _forward[j] = false;
-        _source[j] = i;
-        _target[j] = _root;
-        _reverse[j] = k;
-        _forward[k] = true;
-        _source[k] = _root;
-        _target[k] = i;
-        _reverse[k] = j;
-        ++j; ++k;
-      }
-      _first_out[i] = j;
-      _first_out[_node_num] = k;
-      for (ArcIt a(_graph); a != INVALID; ++a) {
-        int fi = _arc_idf[a];
-        int bi = _arc_idb[a];
-        _reverse[fi] = bi;
-        _reverse[bi] = fi;
-      }
-      
-      // Reset parameters
+      // Reset data structures
       reset();
     }
 
@@ -400,10 +357,9 @@ namespace lemon {
     /// \return <tt>(*this)</tt>
     template <typename LowerMap>
     CapacityScaling& lowerMap(const LowerMap& map) {
-      _have_lower = true;
+      _has_lower = true;
       for (ArcIt a(_graph); a != INVALID; ++a) {
         _lower[_arc_idf[a]] = map[a];
-        _lower[_arc_idb[a]] = map[a];
       }
       return *this;
     }
@@ -475,7 +431,7 @@ namespace lemon {
     /// calling \ref run(), the supply of each node will be set to zero.
     ///
     /// Using this function has the same effect as using \ref supplyMap()
-    /// with such a map in which \c k is assigned to \c s, \c -k is
+    /// with a map in which \c k is assigned to \c s, \c -k is
     /// assigned to \c t and all other nodes have zero supply value.
     ///
     /// \param s The source node.
@@ -492,7 +448,7 @@ namespace lemon {
       _supply[_node_id[t]] = -k;
       return *this;
     }
-    
+
     /// @}
 
     /// \name Execution control
@@ -512,12 +468,12 @@ namespace lemon {
     ///     .supplyMap(sup).run();
     /// \endcode
     ///
-    /// This function can be called more than once. All the parameters
-    /// that have been given are kept for the next call, unless
-    /// \ref reset() is called, thus only the modified parameters
-    /// have to be set again. See \ref reset() for examples.
-    /// However, the underlying digraph must not be modified after this
-    /// class have been constructed, since it copies and extends the graph.
+    /// This function can be called more than once. All the given parameters
+    /// are kept for the next call, unless \ref resetParams() or \ref reset()
+    /// is used, thus only the modified parameters have to be set again.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class (or the last \ref reset() call), then the \ref reset()
+    /// function must be called.
     ///
     /// \param factor The capacity scaling factor. It must be larger than
     /// one to use scaling. If it is less or equal to one, then scaling
@@ -534,6 +490,7 @@ namespace lemon {
     /// these cases.
     ///
     /// \see ProblemType
+    /// \see resetParams(), reset()
     ProblemType run(int factor = 4) {
       _factor = factor;
       ProblemType pt = init();
@@ -547,11 +504,12 @@ namespace lemon {
     /// before using functions \ref lowerMap(), \ref upperMap(),
     /// \ref costMap(), \ref supplyMap(), \ref stSupply().
     ///
-    /// It is useful for multiple run() calls. If this function is not
-    /// used, all the parameters given before are kept for the next
-    /// \ref run() call.
-    /// However, the underlying digraph must not be modified after this
-    /// class have been constructed, since it copies and extends the graph.
+    /// It is useful for multiple \ref run() calls. Basically, all the given
+    /// parameters are kept for the next \ref run() call, unless
+    /// \ref resetParams() or \ref reset() is used.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class or the last \ref reset() call, then the \ref reset()
+    /// function must be used, otherwise \ref resetParams() is sufficient.
     ///
     /// For example,
     /// \code
@@ -561,20 +519,22 @@ namespace lemon {
     ///   cs.lowerMap(lower).upperMap(upper).costMap(cost)
     ///     .supplyMap(sup).run();
     ///
-    ///   // Run again with modified cost map (reset() is not called,
+    ///   // Run again with modified cost map (resetParams() is not called,
     ///   // so only the cost map have to be set again)
     ///   cost[e] += 100;
     ///   cs.costMap(cost).run();
     ///
-    ///   // Run again from scratch using reset()
+    ///   // Run again from scratch using resetParams()
     ///   // (the lower bounds will be set to zero on all arcs)
-    ///   cs.reset();
+    ///   cs.resetParams();
     ///   cs.upperMap(capacity).costMap(cost)
     ///     .supplyMap(sup).run();
     /// \endcode
     ///
     /// \return <tt>(*this)</tt>
-    CapacityScaling& reset() {
+    ///
+    /// \see reset(), run()
+    CapacityScaling& resetParams() {
       for (int i = 0; i != _node_num; ++i) {
         _supply[i] = 0;
       }
@@ -583,7 +543,94 @@ namespace lemon {
         _upper[j] = INF;
         _cost[j] = _forward[j] ? 1 : -1;
       }
-      _have_lower = false;
+      _has_lower = false;
+      return *this;
+    }
+
+    /// \brief Reset the internal data structures and all the parameters
+    /// that have been given before.
+    ///
+    /// This function resets the internal data structures and all the
+    /// paramaters that have been given before using functions \ref lowerMap(),
+    /// \ref upperMap(), \ref costMap(), \ref supplyMap(), \ref stSupply().
+    ///
+    /// It is useful for multiple \ref run() calls. Basically, all the given
+    /// parameters are kept for the next \ref run() call, unless
+    /// \ref resetParams() or \ref reset() is used.
+    /// If the underlying digraph was also modified after the construction
+    /// of the class or the last \ref reset() call, then the \ref reset()
+    /// function must be used, otherwise \ref resetParams() is sufficient.
+    ///
+    /// See \ref resetParams() for examples.
+    ///
+    /// \return <tt>(*this)</tt>
+    ///
+    /// \see resetParams(), run()
+    CapacityScaling& reset() {
+      // Resize vectors
+      _node_num = countNodes(_graph);
+      _arc_num = countArcs(_graph);
+      _res_arc_num = 2 * (_arc_num + _node_num);
+      _root = _node_num;
+      ++_node_num;
+
+      _first_out.resize(_node_num + 1);
+      _forward.resize(_res_arc_num);
+      _source.resize(_res_arc_num);
+      _target.resize(_res_arc_num);
+      _reverse.resize(_res_arc_num);
+
+      _lower.resize(_res_arc_num);
+      _upper.resize(_res_arc_num);
+      _cost.resize(_res_arc_num);
+      _supply.resize(_node_num);
+
+      _res_cap.resize(_res_arc_num);
+      _pi.resize(_node_num);
+      _excess.resize(_node_num);
+      _pred.resize(_node_num);
+
+      // Copy the graph
+      int i = 0, j = 0, k = 2 * _arc_num + _node_num - 1;
+      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
+        _node_id[n] = i;
+      }
+      i = 0;
+      for (NodeIt n(_graph); n != INVALID; ++n, ++i) {
+        _first_out[i] = j;
+        for (OutArcIt a(_graph, n); a != INVALID; ++a, ++j) {
+          _arc_idf[a] = j;
+          _forward[j] = true;
+          _source[j] = i;
+          _target[j] = _node_id[_graph.runningNode(a)];
+        }
+        for (InArcIt a(_graph, n); a != INVALID; ++a, ++j) {
+          _arc_idb[a] = j;
+          _forward[j] = false;
+          _source[j] = i;
+          _target[j] = _node_id[_graph.runningNode(a)];
+        }
+        _forward[j] = false;
+        _source[j] = i;
+        _target[j] = _root;
+        _reverse[j] = k;
+        _forward[k] = true;
+        _source[k] = _root;
+        _target[k] = i;
+        _reverse[k] = j;
+        ++j; ++k;
+      }
+      _first_out[i] = j;
+      _first_out[_node_num] = k;
+      for (ArcIt a(_graph); a != INVALID; ++a) {
+        int fi = _arc_idf[a];
+        int bi = _arc_idb[a];
+        _reverse[fi] = bi;
+        _reverse[bi] = fi;
+      }
+
+      // Reset parameters
+      resetParams();
       return *this;
     }
 
@@ -599,7 +646,7 @@ namespace lemon {
     /// \brief Return the total cost of the found flow.
     ///
     /// This function returns the total cost of the found flow.
-    /// Its complexity is O(e).
+    /// Its complexity is O(m).
     ///
     /// \note The return type of the function can be specified as a
     /// template parameter. For example,
@@ -637,7 +684,8 @@ namespace lemon {
       return _res_cap[_arc_idb[a]];
     }
 
-    /// \brief Return the flow map (the primal solution).
+    /// \brief Copy the flow values (the primal solution) into the
+    /// given map.
     ///
     /// This function copies the flow value on each arc into the given
     /// map. The \c Value type of the algorithm must be convertible to
@@ -661,7 +709,8 @@ namespace lemon {
       return _pi[_node_id[n]];
     }
 
-    /// \brief Return the potential map (the dual solution).
+    /// \brief Copy the potential values (the dual solution) into the
+    /// given map.
     ///
     /// This function copies the potential (dual value) of each node
     /// into the given map.
@@ -690,7 +739,12 @@ namespace lemon {
         _sum_supply += _supply[i];
       }
       if (_sum_supply > 0) return INFEASIBLE;
-      
+
+      // Check lower and upper bounds
+      LEMON_DEBUG(checkBoundMaps(),
+          "Upper bounds must be greater or equal to the lower bounds");
+
+
       // Initialize vectors
       for (int i = 0; i != _root; ++i) {
         _pi[i] = 0;
@@ -700,7 +754,7 @@ namespace lemon {
       // Remove non-zero lower bounds
       const Value MAX = std::numeric_limits<Value>::max();
       int last_out;
-      if (_have_lower) {
+      if (_has_lower) {
         for (int i = 0; i != _root; ++i) {
           last_out = _first_out[i+1];
           for (int j = _first_out[i]; j != last_out; ++j) {
@@ -738,7 +792,7 @@ namespace lemon {
           }
         }
       }
-      
+
       // Handle GEQ supply type
       if (_sum_supply < 0) {
         _pi[_root] = 0;
@@ -765,15 +819,15 @@ namespace lemon {
       // Initialize delta value
       if (_factor > 1) {
         // With scaling
-        Value max_sup = 0, max_dem = 0;
-        for (int i = 0; i != _node_num; ++i) {
+        Value max_sup = 0, max_dem = 0, max_cap = 0;
+        for (int i = 0; i != _root; ++i) {
           Value ex = _excess[i];
           if ( ex > max_sup) max_sup =  ex;
           if (-ex > max_dem) max_dem = -ex;
-        }
-        Value max_cap = 0;
-        for (int j = 0; j != _res_arc_num; ++j) {
-          if (_res_cap[j] > max_cap) max_cap = _res_cap[j];
+          int last_out = _first_out[i+1] - 1;
+          for (int j = _first_out[i]; j != last_out; ++j) {
+            if (_res_cap[j] > max_cap) max_cap = _res_cap[j];
+          }
         }
         max_sup = std::min(std::min(max_sup, max_dem), max_cap);
         for (_delta = 1; 2 * _delta <= max_sup; _delta *= 2) ;
@@ -785,6 +839,15 @@ namespace lemon {
       return OPTIMAL;
     }
 
+    // Check if the upper bound is greater than or equal to the lower bound
+    // on each forward arc.
+    bool checkBoundMaps() {
+      for (int j = 0; j != _res_arc_num; ++j) {
+        if (_forward[j] && _upper[j] < _lower[j]) return false;
+      }
+      return true;
+    }
+
     ProblemType start() {
       // Execute the algorithm
       ProblemType pt;
@@ -794,10 +857,10 @@ namespace lemon {
         pt = startWithoutScaling();
 
       // Handle non-zero lower bounds
-      if (_have_lower) {
+      if (_has_lower) {
         int limit = _first_out[_root];
         for (int j = 0; j != limit; ++j) {
-          if (!_forward[j]) _res_cap[j] += _lower[j];
+          if (_forward[j]) _res_cap[_reverse[j]] += _lower[j];
         }
       }
 
@@ -806,9 +869,9 @@ namespace lemon {
       if (_sum_supply < 0 || pr > 0) {
         for (int i = 0; i != _node_num; ++i) {
           _pi[i] -= pr;
-        }        
+        }
       }
-      
+
       return pt;
     }
 
