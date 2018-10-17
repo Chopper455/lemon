@@ -2,7 +2,7 @@
  *
  * This file is a part of LEMON, a generic C++ optimization library.
  *
- * Copyright (C) 2003-2009
+ * Copyright (C) 2003-2013
  * Egervary Jeno Kombinatorikus Optimalizalasi Kutatocsoport
  * (Egervary Research Group on Combinatorial Optimization, EGRES).
  *
@@ -192,6 +192,11 @@ namespace lemon {
   ///relatively time consuming process to compute the arc lengths if
   ///it is necessary. The default map type is \ref
   ///concepts::Digraph::ArcMap "GR::ArcMap<int>".
+  ///\tparam TR The traits class that defines various types used by the
+  ///algorithm. By default, it is \ref DijkstraDefaultTraits
+  ///"DijkstraDefaultTraits<GR, LEN>".
+  ///In most cases, this parameter should not be set directly,
+  ///consider to use the named template parameters instead.
 #ifdef DOXYGEN
   template <typename GR, typename LEN, typename TR>
 #else
@@ -222,11 +227,11 @@ namespace lemon {
     typedef typename TR::HeapCrossRef HeapCrossRef;
     ///The heap type used by the algorithm.
     typedef typename TR::Heap Heap;
-    ///\brief The \ref DijkstraDefaultOperationTraits "operation traits class"
-    ///of the algorithm.
+    /// \brief The \ref lemon::DijkstraDefaultOperationTraits
+    /// "operation traits class" of the algorithm.
     typedef typename TR::OperationTraits OperationTraits;
 
-    ///The \ref DijkstraDefaultTraits "traits class" of the algorithm.
+    ///The \ref lemon::DijkstraDefaultTraits "traits class" of the algorithm.
     typedef TR Traits;
 
   private:
@@ -1092,6 +1097,9 @@ namespace lemon {
   ///
   /// This class should only be used through the \ref dijkstra() function,
   /// which makes it easier to use the algorithm.
+  ///
+  /// \tparam TR The traits class that defines various types used by the
+  /// algorithm.
   template<class TR>
   class DijkstraWizard : public TR
   {
